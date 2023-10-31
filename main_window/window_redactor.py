@@ -1,6 +1,7 @@
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import QMenu, QMainWindow, QMenuBar
 
+from gui.rendering_widget import RenderingWidget
 from hierarchy_window import HierarchyWindow
 
 
@@ -31,7 +32,7 @@ class WindowRedactor(QMainWindow):
         central_widget = QtWidgets.QWidget()
         self.setCentralWidget(central_widget)
 
-        self.work_zone = QtWidgets.QWidget()
+        self.work_zone = RenderingWidget()
         self.panel_primitive = QtWidgets.QWidget()
         self.hierarchy_window = HierarchyWindow()
 
