@@ -5,11 +5,11 @@ from PyQt5.QtCore import Qt, QPoint
 from PyQt5.QtGui import QPainter, QCursor
 from PyQt5.QtWidgets import QWidget, QPushButton
 
-from core.schema_classes import Primitive, BaseGraphicsModel
+from core.schema_classes import Primitive, BaseGraphicsModel, Block
 from gui.block_widget import BlockWidget
 from gui.pin_widget import PinWidget
 from gui.primitive_widget import PrimitiveWidget
-from settings import primitive_width, primitive_height, pin_width, pin_height
+from settings import primitive_width, primitive_height, pin_width, pin_height, block_width, block_height
 
 
 class RenderingWidget(QWidget):
@@ -24,8 +24,13 @@ class RenderingWidget(QWidget):
             int(primitive_width / 2),
             int(primitive_height / 2)
         )
-        self.primitive_widget = None
         self.primitives_widgets = []
+
+        self.block_widgets = []
+        self.block_offset = QPoint(
+            int(block_width / 2),
+            int(block_height / 2)
+        )
 
         self.pin_widgets = []
         self.pin_offset = QPoint(
@@ -41,7 +46,7 @@ class RenderingWidget(QWidget):
         pass
 
     def add_primitive(self):
-        primitive = Primitive('test', [], 50, 100, 100, 50)
+        primitive = Primitive('primitive', [], 50, 100, 100, 50)
         primitive_widget = PrimitiveWidget(self, controller=None, primitive=primitive)
         primitive_widget.setStyleSheet("background-color: yellow;")
         primitive_widget.show()
@@ -64,6 +69,25 @@ class RenderingWidget(QWidget):
         self.primitives_widgets.remove(primitive_widget)
         primitive_widget.deleteLater()
 
+    def add_block(self):
+        block = Block('block', [], [], 100, 100, block_width, block_height)
+        block_widget = BlockWidget(self, controller=None, block=block)
+        block_widget.show()
+
+        ################################################ tmp
+        pin_widget = PinWidget(self)
+        pin_widget.connected_widget = block_widget
+        self.pin_widgets.append(pin_widget)
+        block_widget.pin_widgets.append(pin_widget)
+        x = block_widget.x() + int(block_widget.width() / 2) - int(pin_widget.width() / 2)
+        y = block_widget.y() + block_widget.height() - int(pin_widget.height() / 2)
+        pin_widget.move(x, y)
+        pin_widget.show()
+        ################################################
+
+        self.block_widgets.append(block_widget)
+        print('add block')
+
     def del_pin(self, pin_widget):
         self.pin_widgets.remove(pin_widget)
         pin_widget.connected_widget.pin_widgets.remove(pin_widget)
@@ -71,11 +95,7 @@ class RenderingWidget(QWidget):
 
     def get_pin_possible_points(self, connected_widget: PrimitiveWidget | BlockWidget):
         self.pin_possible_points.clear()
-
-        if isinstance(self.pressed_widget, PinWidget):
-            offset = self.pin_offset
-        elif isinstance(self.pressed_widget, PrimitiveWidget):
-            offset = self.primitive_offset
+        offset = self.get_offset()
 
         for dx in range(connected_widget.width()):
             self.pin_possible_points.append(QPoint(
@@ -99,21 +119,25 @@ class RenderingWidget(QWidget):
     def calc_distance(self, a: QPoint, b: QPoint):
         return ((a.x() - b.x())**2 + (a.y() - b.y())**2)**0.5
 
+    def get_offset(self):
+        if isinstance(self.pressed_widget, PinWidget):
+            return self.pin_offset
+        elif isinstance(self.pressed_widget, PrimitiveWidget):
+            return self.primitive_offset
+        elif isinstance(self.pressed_widget, BlockWidget):
+            return self.block_offset
+
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
-            for widget in (self.pin_widgets + self.primitives_widgets):
+            for widget in (self.pin_widgets + self.primitives_widgets + self.block_widgets):
                 if widget.geometry().contains(event.pos()):
                     self.pressed_widget = widget
                     self.setCursor(Qt.PointingHandCursor)
                     self.setMouseTracking(True)
 
-                    offset = QPoint()
+                    offset = self.get_offset()
                     if isinstance(self.pressed_widget, PinWidget):
-                        offset = self.pin_offset
                         self.get_pin_possible_points(self.pressed_widget.connected_widget)
-                    elif isinstance(self.pressed_widget, PrimitiveWidget):
-                        offset = self.primitive_offset
-
 
                     QCursor.setPos(self.mapToGlobal(self.pressed_widget.pos() + offset))
                     self.dragging = True
@@ -123,7 +147,7 @@ class RenderingWidget(QWidget):
         if not self.dragging:
             return
 
-        if isinstance(self.pressed_widget, PrimitiveWidget):
+        if isinstance(self.pressed_widget, (PrimitiveWidget, BlockWidget)):
             x_possible = (
                 int(self.pressed_widget.width()/2),
                 self.width() - int(self.pressed_widget.width()/2)
@@ -160,7 +184,7 @@ class RenderingWidget(QWidget):
             min_distance = self.calc_distance(new_pos_pin, event.pos())
 
             for point in self.pin_possible_points:
-                distance = self.calc_distance(point, event.pos())
+                distance = self.calc_distance(point + self.pin_offset, event.pos())
                 if distance < min_distance:
                     new_pos_pin = point
                     min_distance = distance
