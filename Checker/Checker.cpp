@@ -4,5 +4,6 @@
 #include "graph.h"
 
 int main(){
-	
+	//test_graph();
+	test_objects();
 }

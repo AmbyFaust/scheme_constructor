@@ -32,4 +32,4 @@ private:
 
 void test_graph();
 
-#endif //GRAPH_H
+#endif // !GRAPH_H

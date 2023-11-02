@@ -128,7 +128,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Checker.cpp" />
+    <ClCompile Include="check_tools.cpp" />
     <ClCompile Include="graph.cpp" />
+    <ClCompile Include="netlist.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="check_tools.h" />

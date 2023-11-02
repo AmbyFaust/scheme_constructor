@@ -60,10 +60,6 @@ unsigned int Graph::get_components_cnt() const
 	int start_v = 0;
 	bool stop = false;
 	while (true) {
-		std::cout << start_v << " <- start_v" << std::endl;
-		for (auto el : visited) {
-			std::cout << el << " ";
-		}std::cout << std::endl;
 		for (int i = start_v; i < visited.size(); i++) {
 			if (visited[start_v] == 0) {
 				break;
@@ -77,10 +73,6 @@ unsigned int Graph::get_components_cnt() const
 			break;
 		dfs(start_v, start_v, visited);
 		cnt_res++;
-		for (auto el : visited) {
-			std::cout << el << " ";
-		}std::cout << std::endl;
-		std::cout << cnt_res << std::endl;
 	}
 	return cnt_res;
 }
@@ -129,7 +121,6 @@ void Graph::show()
 bool Graph::dfs(unsigned int v, unsigned int p, std::vector<unsigned int>& visit_status) const
 {
 	visit_status[v] = 1;
-	std::cout << "dfs_v: " << v << std::endl;
 	for (int i = 0; i < this->adjacency_array[v].size(); i++) {
 		int to = this->adjacency_array[v][i];
 		if (to == p)

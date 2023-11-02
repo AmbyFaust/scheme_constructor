@@ -1,5 +1,7 @@
-#pragma once
+#ifndef CHECK_TOOLS
+#define CHECK_TOOLS
 
+#include <fstream>
 #include "netlist.h"
 #include "graph.h"
 
@@ -15,6 +17,7 @@ bool empty_pin_check(const Graph& expanded);
 
 bool unconnected_circuit_check(const Graph& expanded);
 
-bool incorrect_circuit_check(const Graph& expanded);
+void write_check_result(std::string filename, std::string res);
 
-void write_check_result(std::string filename);
+
+#endif // !CHECK_TOOLS
