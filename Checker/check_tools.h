@@ -7,7 +7,7 @@ Graph recurcive_check(const NetList& scheme);
 
 bool all_primitive_level(const NetList& scheme);
 
-bool upper_hierarchy_check(const NetList& scheme);
+bool upper_hierarchy_check(const Graph& scheme);
 
 bool lower_hierarchy_check(const Graph& expanded);
 
