@@ -1,10 +1,11 @@
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QPoint
+from PyQt5.QtGui import QCursor
 from PyQt5.QtWidgets import QWidget, QAction, QMenu, QLabel, QVBoxLayout, QDialog
 
 from core.schema_classes import Block
 from gui.rendering_controller import RenderingController
 from gui.set_name_dialog import SetNameDialog
-from settings import block_width, block_height
+from settings import block_width, block_height, rendering_widget_width, rendering_widget_height
 
 
 class BlockWidget(QWidget):
@@ -19,6 +20,12 @@ class BlockWidget(QWidget):
         self.setStyleSheet("border: 2px solid black; background-color: #42aaff;")
 
         self.pin_widgets = []
+
+        self.dragging = False
+        self.offset = QPoint(
+            int(self.width() / 2),
+            int(self.height() / 2)
+        )
 
         self.__create_widgets()
         self.__create_layouts()
@@ -69,6 +76,49 @@ class BlockWidget(QWidget):
         if set_name_dialog.exec_() == QDialog.Accepted:
             self.block.set_name(set_name_dialog.name_edit.text())
             self.name_label.setText(self.block.get_name())
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            QCursor.setPos(self.mapToGlobal(self.offset))
+            self.dragging = True
+
+    def mouseMoveEvent(self, event):
+        if self.dragging:
+            x_possible = (
+                int(self.width() / 2),
+                rendering_widget_width - int(self.width() / 2)
+            )
+            y_possible = (
+                int(self.height() / 2),
+                rendering_widget_height - int(self.height() / 2)
+            )
+            pos = self.pos() + event.pos()
+            cursor_x = pos.x()
+            cursor_y = pos.y()
+            delta_x = 0
+            delta_y = 0
+            last_pos_cursor_screen = QCursor.pos()
+            if cursor_x < x_possible[0]:
+                delta_x = cursor_x - x_possible[0]
+            elif cursor_x > x_possible[1]:
+                delta_x = cursor_x - x_possible[1]
+            if cursor_y < y_possible[0]:
+                delta_y = cursor_y - y_possible[0]
+            elif cursor_y > y_possible[1]:
+                delta_y = cursor_y - y_possible[1]
+            QCursor.setPos(
+                last_pos_cursor_screen.x() - delta_x,
+                last_pos_cursor_screen.y() - delta_y
+            )
+            new_pos = pos - QPoint(delta_x, delta_y) - self.offset
+            for pin_widget in self.pin_widgets:
+                new_pos_pin = pin_widget.pos() + new_pos - self.pos()
+                pin_widget.move(new_pos_pin)
+            self.move(new_pos)
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.dragging = False
 
 
 

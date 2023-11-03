@@ -1,26 +1,42 @@
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPainter, QColor
-from PyQt5.QtWidgets import QWidget
+import math
 
+from PyQt5.QtCore import Qt, QPoint
+from PyQt5.QtGui import QPainter, QColor, QCursor
+from PyQt5.QtWidgets import QWidget, QAction
+
+from gui.block_widget import BlockWidget
+from gui.primitive_widget import PrimitiveWidget
 from gui.rendering_controller import RenderingController
-from settings import pin_width, pin_height
+from settings import pin_width, pin_height, rendering_widget_width
 
 
 class PinWidget(QWidget):
-    def __init__(self, parent=None, controller: RenderingController = None):
-        super().__init__()
+    def __init__(self, parent, connected_widget: BlockWidget | PrimitiveWidget,
+                 controller: RenderingController = None):
         super(PinWidget, self).__init__(parent)
         self.setAttribute(Qt.WA_StyledBackground, True)
-        self.setStyleSheet("border: 0px solid black;")
+        self.setStyleSheet("border: 1px black;")
         self.setFixedWidth(pin_width)
         self.setFixedHeight(pin_height)
         self.controller = controller
-        self.connected_widget = None
+        self.connected_widget = connected_widget
+        self.connected_widget.pin_widgets.append(self)
         self.pin_connection = None
         self.graphics_model = None
+        self.wire = None
+
+        self.dragging = False
+        self.offset = QPoint(
+            int(self.width() / 2),
+            int(self.height() / 2)
+        )
+        self.pin_possible_move_points = self.get_pin_possible_points()
+
         self.__set_widgets()
         self.__set_layouts()
         self.__set_connections()
+        # self.setContextMenuPolicy(Qt.CustomContextMenu)
+        # self.customContextMenuRequested.connect(self.show_context_menu)
 
     def __set_widgets(self):
         pass
@@ -31,11 +47,19 @@ class PinWidget(QWidget):
     def __set_connections(self):
         pass
 
+    def __create_actions(self):
+        self.add_pin_action = QAction("Добавить Пин", self)
+        self.add_pin_action.triggered.connect(self.add_pin)
+        self.set_name_action = QAction("Изменить имя", self)
+        self.set_name_action.triggered.connect(self.set_name)
+        self.del_action = QAction("Удалить", self)
+        self.del_action.triggered.connect(self.delete)
+
     def paintEvent(self, event):
         painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)  # Включаем сглаживание
-        painter.setBrush(QColor(255, 0, 0))  # Задаем цвет круга (красный)
-        painter.setPen(Qt.NoPen)  # Убираем обводку
+        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setBrush(QColor(255, 0, 0))
+        # painter.setPen(Qt.NoPen)  # Убираем обводку
 
         # Рисуем круг в центре виджета
         rect = self.rect()
@@ -47,3 +71,38 @@ class PinWidget(QWidget):
 
     def set_graphics_model(self, graphics_model):
         self.graphics_model = graphics_model
+
+    def calc_distance(self, a: QPoint, b: QPoint):
+        return ((a.x() - b.x())**2 + (a.y() - b.y())**2)**0.5
+
+    def get_pin_possible_points(self):
+        possible_points = []
+
+        for dx in range(self.connected_widget.width()):
+            possible_points.append(QPoint(dx, 0) - self.offset)
+            possible_points.append(QPoint(dx, self.connected_widget.height()) - self.offset)
+        for dy in range(self.connected_widget.height()):
+            possible_points.append(QPoint(0, dy) - self.offset)
+            possible_points.append(QPoint(self.connected_widget.width(), dy) - self.offset)
+
+        return possible_points
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            QCursor.setPos(self.mapToGlobal(self.offset))
+            self.dragging = True
+
+    def mouseMoveEvent(self, event):
+        new_pos = self.pin_possible_move_points[0]
+        min_distance = math.inf
+        print(self.pos())
+        for point in self.pin_possible_move_points:
+            distance = self.calc_distance(self.connected_widget.pos() + point, self.pos() + event.pos())
+            if distance < min_distance:
+                new_pos = point
+                min_distance = distance
+        self.move(self.connected_widget.pos() + new_pos)
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.dragging = False

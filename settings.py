@@ -1,3 +1,6 @@
+rendering_widget_width = 400
+rendering_widget_height = 400
+
 primitive_width = 100
 primitive_height = 50
 
