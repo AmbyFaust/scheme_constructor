@@ -23,7 +23,6 @@ class RenderingWidget(QWidget):
 
         self.primitives_widgets = []
         self.block_widgets = []
-        self.pin_widgets = []
 
         self.__create_widgets()
 
@@ -36,43 +35,24 @@ class RenderingWidget(QWidget):
         primitive_widget.setStyleSheet("background-color: yellow;")
         primitive_widget.show()
 
-        ################################################ tmp
-        pin_widget = PinWidget(self, primitive_widget)
-        self.pin_widgets.append(pin_widget)
-        x = primitive_widget.x() + int(primitive_widget.width() / 2) - int(pin_widget.width() / 2)
-        y = primitive_widget.y() + primitive_widget.height() - int(pin_widget.height() / 2)
-        pin_widget.move(x, y)
-        pin_widget.show()
-        ################################################
-
         self.primitives_widgets.append(primitive_widget)
         print('add primitive')
 
-    def del_primitive(self, primitive_widget):
+    def del_primitive(self, primitive_widget: PrimitiveWidget):
         self.primitives_widgets.remove(primitive_widget)
+        primitive_widget.destructor()
         primitive_widget.deleteLater()
+
+
+
 
     def add_block(self):
         block = Block('block', [], [], 100, 100, block_width, block_height)
         block_widget = BlockWidget(self, controller=None, block=block)
         block_widget.show()
 
-        ################################################ tmp
-        pin_widget = PinWidget(self, block_widget)
-        self.pin_widgets.append(pin_widget)
-        x = block_widget.x() + int(block_widget.width() / 2) - int(pin_widget.width() / 2)
-        y = block_widget.y() + block_widget.height() - int(pin_widget.height() / 2)
-        pin_widget.move(x, y)
-        pin_widget.show()
-        ################################################
-
         self.block_widgets.append(block_widget)
         print('add block')
-
-    def del_pin(self, pin_widget):
-        self.pin_widgets.remove(pin_widget)
-        pin_widget.connected_widget.pin_widgets.remove(pin_widget)
-        pin_widget.deleteLater()
 
 
 

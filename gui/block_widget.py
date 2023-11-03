@@ -3,9 +3,10 @@ from PyQt5.QtGui import QCursor
 from PyQt5.QtWidgets import QWidget, QAction, QMenu, QLabel, QVBoxLayout, QDialog
 
 from core.schema_classes import Block
+from gui.pin_widget import PinWidget
 from gui.rendering_controller import RenderingController
 from gui.set_name_dialog import SetNameDialog
-from settings import block_width, block_height, rendering_widget_width, rendering_widget_height
+from settings import rendering_widget_width, rendering_widget_height
 
 
 class BlockWidget(QWidget):
@@ -69,7 +70,10 @@ class BlockWidget(QWidget):
         pass
 
     def add_pin(self):
-        pass
+        pin_widget = PinWidget(self.parent(), self)
+        self.pin_widgets.append(pin_widget)
+        pin_widget.stackUnder(self)
+        pin_widget.show()
 
     def set_name(self):
         set_name_dialog = SetNameDialog(self.name_label.text())

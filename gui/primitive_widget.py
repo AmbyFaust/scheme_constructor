@@ -3,6 +3,7 @@ from PyQt5.QtGui import QPainter, QCursor
 from PyQt5.QtWidgets import QWidget, QMenu, QAction, QVBoxLayout, QLabel, QDialog
 
 from core.schema_classes import Primitive
+from gui.pin_widget import PinWidget
 from gui.rendering_controller import RenderingController
 from gui.set_name_dialog import SetNameDialog
 from settings import primitive_width, primitive_height, rendering_widget_width, rendering_widget_height
@@ -34,6 +35,11 @@ class PrimitiveWidget(QWidget):
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.show_context_menu)
 
+    def destructor(self):
+        for pin_widget in self.pin_widgets:
+            pin_widget.destructor()
+            pin_widget.deleteLater()
+
     def __create_widgets(self):
         self.name_label = QLabel(self.primitive.get_name())
         self.name_label.setStyleSheet('border: 0px ')
@@ -61,10 +67,12 @@ class PrimitiveWidget(QWidget):
         context_menu.exec(self.mapToGlobal(position))
 
     def delete(self):
-        pass
+        self.parent().del_primitive(self)
 
     def add_pin(self):
-        pass
+        pin_widget = PinWidget(self.parent(), self)
+        self.pin_widgets.append(pin_widget)
+        pin_widget.show()
 
     def set_name(self):
         set_name_dialog = SetNameDialog(self.name_label.text())
@@ -108,8 +116,10 @@ class PrimitiveWidget(QWidget):
             new_pos = pos - QPoint(delta_x, delta_y) - self.offset
             for pin_widget in self.pin_widgets:
                 new_pos_pin = pin_widget.pos() + new_pos - self.pos()
+                print(pin_widget.pos().y(), new_pos.y(), self.pos().y())
                 pin_widget.move(new_pos_pin)
             self.move(new_pos)
+
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:

@@ -4,15 +4,12 @@ from PyQt5.QtCore import Qt, QPoint
 from PyQt5.QtGui import QPainter, QColor, QCursor
 from PyQt5.QtWidgets import QWidget, QAction
 
-from gui.block_widget import BlockWidget
-from gui.primitive_widget import PrimitiveWidget
 from gui.rendering_controller import RenderingController
-from settings import pin_width, pin_height, rendering_widget_width
+from settings import pin_width, pin_height
 
 
 class PinWidget(QWidget):
-    def __init__(self, parent, connected_widget: BlockWidget | PrimitiveWidget,
-                 controller: RenderingController = None):
+    def __init__(self, parent, connected_widget, controller: RenderingController = None):
         super(PinWidget, self).__init__(parent)
         self.setAttribute(Qt.WA_StyledBackground, True)
         self.setStyleSheet("border: 1px black;")
@@ -20,7 +17,6 @@ class PinWidget(QWidget):
         self.setFixedHeight(pin_height)
         self.controller = controller
         self.connected_widget = connected_widget
-        self.connected_widget.pin_widgets.append(self)
         self.pin_connection = None
         self.graphics_model = None
         self.wire = None
@@ -35,8 +31,16 @@ class PinWidget(QWidget):
         self.__set_widgets()
         self.__set_layouts()
         self.__set_connections()
+
+        self.move(
+            connected_widget.x() + int(connected_widget.width() / 2) - int(self.width() / 2),
+            connected_widget.y() + connected_widget.height() - int(self.height() / 2)
+        )
         # self.setContextMenuPolicy(Qt.CustomContextMenu)
         # self.customContextMenuRequested.connect(self.show_context_menu)
+
+    def destructor(self):
+        self.connected_widget = None
 
     def __set_widgets(self):
         pass
@@ -95,7 +99,6 @@ class PinWidget(QWidget):
     def mouseMoveEvent(self, event):
         new_pos = self.pin_possible_move_points[0]
         min_distance = math.inf
-        print(self.pos())
         for point in self.pin_possible_move_points:
             distance = self.calc_distance(self.connected_widget.pos() + point, self.pos() + event.pos())
             if distance < min_distance:
@@ -106,3 +109,6 @@ class PinWidget(QWidget):
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.dragging = False
+
+    def __del__(self):
+        print('уняня')
