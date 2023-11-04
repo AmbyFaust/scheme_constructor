@@ -34,6 +34,11 @@ class BlockWidget(QWidget):
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.show_context_menu)
 
+    def destructor(self):
+        for pin_widget in self.pin_widgets:
+            pin_widget.destructor()
+            pin_widget.deleteLater()
+
     def __create_widgets(self):
         self.name_label = QLabel(self.block.get_name())
         self.name_label.setStyleSheet('border: 0px ')
@@ -43,12 +48,6 @@ class BlockWidget(QWidget):
         common_v_layout = QVBoxLayout()
         common_v_layout.addWidget(self.name_label)
         self.setLayout(common_v_layout)
-
-    def __create_actions(self):
-        self.del_action = QAction("Удалить", self)
-        self.del_action.triggered.connect(self.delete)
-        self.add_pin_action = QAction("Добавить Пин", self)
-        self.add_pin_action.triggered.connect(self.add_pin)
 
     def __create_actions(self):
         self.add_pin_action = QAction("Добавить Пин", self)
@@ -67,12 +66,11 @@ class BlockWidget(QWidget):
         context_menu.exec(self.mapToGlobal(position))
 
     def delete(self):
-        pass
+        self.parent().del_block(self)
 
     def add_pin(self):
         pin_widget = PinWidget(self.parent(), self)
         self.pin_widgets.append(pin_widget)
-        pin_widget.stackUnder(self)
         pin_widget.show()
 
     def set_name(self):

@@ -2,7 +2,7 @@ import math
 
 from PyQt5.QtCore import Qt, QPoint
 from PyQt5.QtGui import QPainter, QColor, QCursor
-from PyQt5.QtWidgets import QWidget, QAction
+from PyQt5.QtWidgets import QWidget, QAction, QMenu
 
 from gui.rendering_controller import RenderingController
 from settings import pin_width, pin_height
@@ -31,13 +31,14 @@ class PinWidget(QWidget):
         self.__set_widgets()
         self.__set_layouts()
         self.__set_connections()
+        self.__create_actions()
 
         self.move(
             connected_widget.x() + int(connected_widget.width() / 2) - int(self.width() / 2),
             connected_widget.y() + connected_widget.height() - int(self.height() / 2)
         )
-        # self.setContextMenuPolicy(Qt.CustomContextMenu)
-        # self.customContextMenuRequested.connect(self.show_context_menu)
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.show_context_menu)
 
     def destructor(self):
         self.connected_widget = None
@@ -52,12 +53,20 @@ class PinWidget(QWidget):
         pass
 
     def __create_actions(self):
-        self.add_pin_action = QAction("Добавить Пин", self)
-        self.add_pin_action.triggered.connect(self.add_pin)
+        self.add_wire_action = QAction("Добавить провод", self)
+        self.add_wire_action.triggered.connect(self.add_wire)
         self.set_name_action = QAction("Изменить имя", self)
         self.set_name_action.triggered.connect(self.set_name)
         self.del_action = QAction("Удалить", self)
         self.del_action.triggered.connect(self.delete)
+
+    def show_context_menu(self, position):
+        context_menu = QMenu(self)
+        context_menu.setStyleSheet("background-color: gray;")
+        context_menu.addAction(self.add_wire_action)
+        context_menu.addAction(self.set_name_action)
+        context_menu.addAction(self.del_action)
+        context_menu.exec(self.mapToGlobal(position))
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -109,6 +118,16 @@ class PinWidget(QWidget):
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.dragging = False
+
+    def set_name(self):
+        pass
+
+    def delete(self):
+        self.connected_widget.pin_widgets.remove(self)
+        self.deleteLater()
+
+    def add_wire(self):
+        pass
 
     def __del__(self):
         print('уняня')

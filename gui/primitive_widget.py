@@ -10,8 +10,7 @@ from settings import primitive_width, primitive_height, rendering_widget_width, 
 
 
 class PrimitiveWidget(QWidget):
-    def __init__(self, parent=None, controller: RenderingController = None,
-                 primitive: Primitive = None):
+    def __init__(self, parent, primitive: Primitive, controller: RenderingController = None):
         super(PrimitiveWidget, self).__init__(parent)
         self.setAttribute(Qt.WA_StyledBackground, True)
         self.controller = controller
@@ -116,7 +115,6 @@ class PrimitiveWidget(QWidget):
             new_pos = pos - QPoint(delta_x, delta_y) - self.offset
             for pin_widget in self.pin_widgets:
                 new_pos_pin = pin_widget.pos() + new_pos - self.pos()
-                print(pin_widget.pos().y(), new_pos.y(), self.pos().y())
                 pin_widget.move(new_pos_pin)
             self.move(new_pos)
 

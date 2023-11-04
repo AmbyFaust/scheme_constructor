@@ -29,31 +29,28 @@ class RenderingWidget(QWidget):
     def __create_widgets(self):
         pass
 
-    def add_primitive(self):
-        primitive = Primitive('primitive', [], 50, 100, 100, 50)
+    def add_primitive(self, primitive: Primitive = None):
+        if not primitive:
+            primitive = Primitive('primitive', [], 50, 100, 100, 50)
         primitive_widget = PrimitiveWidget(self, controller=None, primitive=primitive)
-        primitive_widget.setStyleSheet("background-color: yellow;")
         primitive_widget.show()
 
         self.primitives_widgets.append(primitive_widget)
-        print('add primitive')
 
     def del_primitive(self, primitive_widget: PrimitiveWidget):
         self.primitives_widgets.remove(primitive_widget)
         primitive_widget.destructor()
         primitive_widget.deleteLater()
 
-
-
-
-    def add_block(self):
-        block = Block('block', [], [], 100, 100, block_width, block_height)
+    def add_block(self, block: Block = None):
+        if not block:
+            block = Block('block', [], [], 100, 100, block_width, block_height)
         block_widget = BlockWidget(self, controller=None, block=block)
         block_widget.show()
 
         self.block_widgets.append(block_widget)
-        print('add block')
 
-
-
-
+    def del_block(self, block_widget: BlockWidget):
+        self.block_widgets.remove(block_widget)
+        block_widget.destructor()
+        block_widget.deleteLater()
