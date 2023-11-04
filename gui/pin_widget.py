@@ -1,12 +1,12 @@
 import math
 
 from PyQt5.QtCore import Qt, QPoint
-from PyQt5.QtGui import QPainter, QColor, QCursor
+from PyQt5.QtGui import QPainter, QColor, QCursor, QPen
 from PyQt5.QtWidgets import QWidget, QAction, QMenu
 
 from gui.rendering_controller import RenderingController
 from gui.wire_widget import WireWidget, Direction
-from settings import pin_width, pin_height
+from settings import pin_width, pin_height, width_wire
 
 
 class PossiblePoints:
@@ -30,6 +30,9 @@ class PinWidget(QWidget):
     def __init__(self, parent, connected_widget, controller: RenderingController = None):
         super(PinWidget, self).__init__(parent)
         self.setAttribute(Qt.WA_StyledBackground, True)
+        self.border = Qt.NoPen
+        self.color = QColor()
+
         self.setStyleSheet("border: 1px black;")
         self.setFixedWidth(pin_width)
         self.setFixedHeight(pin_height)
@@ -60,6 +63,9 @@ class PinWidget(QWidget):
         )
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.show_context_menu)
+        self.unlock()
+        self.setMouseTracking(True)
+
 
     def destructor(self):
         self.connected_widget = None
@@ -89,11 +95,23 @@ class PinWidget(QWidget):
         context_menu.addAction(self.del_action)
         context_menu.exec(self.mapToGlobal(position))
 
+    def lock(self):
+        self.border = QPen(Qt.black)
+        self.border.setWidth(1)
+        self.color = QColor(0, 255, 0)
+        self.connected_widget.lock()
+        self.update()
+
+    def unlock(self):
+        self.border = Qt.NoPen
+        self.color = QColor(255, 0, 0)
+        self.update()
+
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
-        painter.setBrush(QColor(255, 0, 0))
-        # painter.setPen(Qt.NoPen)  # Убираем обводку
+        painter.setBrush(self.color)
+        painter.setPen(self.border)
 
         # Рисуем круг в центре виджета
         rect = self.rect()
@@ -111,18 +129,39 @@ class PinWidget(QWidget):
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
+            wire = self.parent().rendered_wire
+            if wire:
+                pos_in_conn_widget = self.pos() - self.connected_widget.pos()
+                pin_direction = Direction.vertical
+                delta = QPoint(width_wire // 2 + 1, 0)
+                if (pos_in_conn_widget in self.pin_possible_move_points.left) \
+                        or (pos_in_conn_widget in self.pin_possible_move_points.right):
+                    pin_direction = Direction.horizontal
+                    delta = QPoint(0, width_wire // 2 + 1)
+                if self.wire == wire or pin_direction != wire.direction:
+                    return
+                wire.connected_widget = self
+                wire.set_location(end=self.pos() + self.offset)
+                self.move(wire.end - self.offset + delta)
+                self.wire = wire
+                self.parent().rendered_wire = None
+                self.lock()
+                return
             QCursor.setPos(self.mapToGlobal(self.offset))
             self.dragging = True
 
     def mouseMoveEvent(self, event):
-        new_pos = self.pin_possible_move_points.all[0]
-        min_distance = math.inf
-        for point in self.pin_possible_move_points.all:
-            distance = self.calc_distance(self.connected_widget.pos() + point, self.pos() + event.pos())
-            if distance < min_distance:
-                new_pos = point
-                min_distance = distance
-        self.move(self.connected_widget.pos() + new_pos)
+        if self.dragging and not self.wire:
+            new_pos = self.pin_possible_move_points.all[0]
+            min_distance = math.inf
+            for point in self.pin_possible_move_points.all:
+                distance = self.calc_distance(self.connected_widget.pos() + point, self.pos() + event.pos())
+                if distance < min_distance:
+                    new_pos = point
+                    min_distance = distance
+            self.move(self.connected_widget.pos() + new_pos)
+        else:
+            self.parent().mouseMoveEvent(event.pos() + self.pos())
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -138,15 +177,18 @@ class PinWidget(QWidget):
     def add_wire(self):
         pos_in_conn_widget = self.pos() - self.connected_widget.pos()
         direction = Direction.vertical
+        delta = QPoint(width_wire // 2 + 1, 0)
         if (pos_in_conn_widget in self.pin_possible_move_points.left) \
                 or (pos_in_conn_widget in self.pin_possible_move_points.right):
             direction = Direction.horizontal
-        self.wire = WireWidget(self.parent(), self.pos() + self.offset, direction
-        )
+            delta = QPoint(0, width_wire // 2 + 1)
+
+        self.wire = WireWidget(self.parent(), self.pos() + self.offset - delta, direction)
         print(direction)
         self.wire.stackUnder(self.connected_widget)
         self.parent().rendered_wire = self.wire
         self.wire.show()
+        self.lock()
 
     def __del__(self):
         print('уняня')

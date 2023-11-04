@@ -14,11 +14,11 @@ class BlockWidget(QWidget):
         super(BlockWidget, self).__init__(parent)
         self.setAttribute(Qt.WA_StyledBackground, True)
         self.controller = controller
+        self.unlock()
         self.block = block
         self.move(block.get_left(), block.get_top())
         self.setFixedWidth(block.get_width())
         self.setFixedHeight(block.get_height())
-        self.setStyleSheet("border: 2px solid black; background-color: #42aaff;")
 
         self.pin_widgets = []
 
@@ -65,6 +65,12 @@ class BlockWidget(QWidget):
         context_menu.addAction(self.del_action)
         context_menu.exec(self.mapToGlobal(position))
 
+    def lock(self):
+        self.setStyleSheet("border: 2px solid black; background-color: #42aaff;")
+
+    def unlock(self):
+        self.setStyleSheet("border: 0px solid black; background-color: #42aaff;")
+
     def delete(self):
         self.parent().del_block(self)
 
@@ -81,6 +87,9 @@ class BlockWidget(QWidget):
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
+            for pin_widget in self.pin_widgets:
+                if pin_widget.wire:
+                    return
             QCursor.setPos(self.mapToGlobal(self.offset))
             self.dragging = True
 
@@ -117,6 +126,8 @@ class BlockWidget(QWidget):
                 new_pos_pin = pin_widget.pos() + new_pos - self.pos()
                 pin_widget.move(new_pos_pin)
             self.move(new_pos)
+        else:
+            self.parent().mouseMoveEvent(event.pos() + self.pos())
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:

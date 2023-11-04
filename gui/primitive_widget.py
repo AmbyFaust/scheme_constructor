@@ -1,3 +1,6 @@
+import typing
+
+from PyQt5 import QtGui
 from PyQt5.QtCore import QRect, QPoint, Qt
 from PyQt5.QtGui import QPainter, QCursor
 from PyQt5.QtWidgets import QWidget, QMenu, QAction, QVBoxLayout, QLabel, QDialog
@@ -18,7 +21,7 @@ class PrimitiveWidget(QWidget):
         self.move(primitive.get_left(), primitive.get_top())
         self.setFixedWidth(primitive.get_width())
         self.setFixedHeight(primitive.get_height())
-        self.setStyleSheet("border: 2px solid black; background-color: #cccccc;")
+        self.unlock()
 
         self.pin_widgets = []
 
@@ -33,6 +36,8 @@ class PrimitiveWidget(QWidget):
         self.__create_actions()
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.show_context_menu)
+
+        self.setMouseTracking(True)
 
     def destructor(self):
         for pin_widget in self.pin_widgets:
@@ -79,8 +84,17 @@ class PrimitiveWidget(QWidget):
             self.primitive.set_name(set_name_dialog.name_edit.text())
             self.name_label.setText(self.primitive.get_name())
 
+    def lock(self):
+        self.setStyleSheet("border: 2px solid black; background-color: #cccccc;")
+
+    def unlock(self):
+        self.setStyleSheet("border: 0px solid black; background-color: #cccccc;")
+
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
+            for pin_widget in self.pin_widgets:
+                if pin_widget.wire:
+                    return
             QCursor.setPos(self.mapToGlobal(self.offset))
             self.dragging = True
 
@@ -118,6 +132,8 @@ class PrimitiveWidget(QWidget):
                 pin_widget.move(new_pos_pin)
             self.move(new_pos)
 
+        else:
+            self.parent().mouseMoveEvent(event.pos() + self.pos())
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:

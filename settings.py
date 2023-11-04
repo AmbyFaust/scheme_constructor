@@ -9,3 +9,5 @@ block_height = primitive_height
 
 pin_width = 16
 pin_height = 16
+
+width_wire = 13
