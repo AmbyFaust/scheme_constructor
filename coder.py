@@ -1,4 +1,4 @@
-import schema_classes
+import json
 
 def converting_to_json(dict):
     """
@@ -6,7 +6,7 @@ def converting_to_json(dict):
     :param dict: dictionary with entities
     return json
     """
-    pass
+    return json.dumps(dict)
 
 def code_pins(pins):
     """
@@ -17,8 +17,8 @@ def code_pins(pins):
     list_of_pins = []
     for pin in pins:
         pin_dictionary = {
-            'name' = pin.get_name(),
-            'top_left' = pin.get_top_left()
+            'name': pin.get_name(),
+            'top_left': pin.get_top_left()
         }
         list_of_pins.append(converting_to_json(pin_dictionary))
     return list_of_pins
@@ -34,9 +34,9 @@ def code_pin_nets(pin_nets):
     list_of_pin_nets = []
     for pn in pin_nets:
         pin_nets_dictionary = {
-            'name' = pn.get_name(),
-        'pins' = code_pins(pn.get_pins()),
-        'lines' = pn.get_lines()  # Надо придумать в каком виде это записывать
+            'name': pn.get_name(),
+            'pins': code_pins(pn.get_pins()),
+            'lines': pn.get_lines()
         }
         list_of_pin_nets.append(converting_to_json(pin_nets_dictionary))
     return list_of_pin_nets
@@ -50,14 +50,19 @@ def code_objects(objects):
     """
     list_of_objects = []
     for obj in objects:
+        link = obj.get_link()
+        type = obj.get_type()
         obj_dictionary = {
-            'type' = obj.get_type(),
-            'name' = obj.get_name(),
-            'top_left' = obj.get_top_left(),
-            'width' = obj.get_width(),
-            'height' = obj.get_height(),
-            'pins' = code_pins(obj.get_pins())
+            'type': type,
+            'name': obj.get_name(),
+            'top_left': obj.get_top_left(),
+            'width': obj.get_width(),
+            'height': obj.get_height()
         }
+        if (type == 'block'):
+            obj_dictionary['pins'] = code_pins(obj.get_pins())
+        if (link != ''):
+            obj_dictionary['link'] = link
         list_of_objects.append(converting_to_json(obj_dictionary))
     return list_of_objects
 
@@ -71,17 +76,22 @@ def scheme_to_json(schema, filename):
     """
     list_of_blocks = []  # лист в который будут складываться блоки в формате json
     for obj in schema:
+        type = obj.get_type()
+        link = obj.get_link()
         obj_description = {
-            'type' = obj.get_type(),
-        'name' = obj.get_name(),
-        'top_left' = obj.get_top_left(),
-        'width' = obj.get_width(),
-        'height' = obj.get_height(),
-        'objects' = code_objects(obj.get_objects()),
-        'pins' = code_pins(obj.get_pins()),
-        'pin_nets' = code_pin_nets(obj.get_pin_nets())
-        }
+            'type': type,
+            'name': obj.get_name(),
+            'top_left': obj.get_top_left(),
+            'width': obj.get_width(),
+            'height': obj.get_height()}
+        if (type == 'block' & link == ''):
+                obj_description['objects'] = code_objects(obj.get_objects())
+                obj_description['pins'] = code_pins(obj.get_pins())
+                obj_description['pin_nets'] = code_pin_nets(obj.get_pin_nets())
+        elif((type == 'block' & link != '') | (type == 'primitive' & link != '')):
+            obj_description['link'] = link
         list_of_blocks.append(converting_to_json(obj_description))
 
-    # Здесь будет код записи списка json объектов в файл
-    pass
+    f = open(filename, 'w')
+    f.write(str(list_of_blocks))
+    f.close()
