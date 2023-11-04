@@ -9,6 +9,7 @@ from core.schema_classes import Primitive, BaseGraphicsModel, Block
 from gui.block_widget import BlockWidget
 from gui.pin_widget import PinWidget
 from gui.primitive_widget import PrimitiveWidget
+from gui.wire_widget import Direction
 from settings import primitive_width, primitive_height, pin_width, pin_height, block_width, block_height, \
     rendering_widget_width, rendering_widget_height
 
@@ -24,7 +25,10 @@ class RenderingWidget(QWidget):
         self.primitives_widgets = []
         self.block_widgets = []
 
+        self.rendered_wire = None
+
         self.__create_widgets()
+        self.setMouseTracking(True)
 
     def __create_widgets(self):
         pass
@@ -54,3 +58,22 @@ class RenderingWidget(QWidget):
         self.block_widgets.remove(block_widget)
         block_widget.destructor()
         block_widget.deleteLater()
+
+    def mouseMoveEvent(self, event):
+        if self.rendered_wire:
+            if self.rendered_wire.direction == Direction.horizontal:
+                new_width = event.x() - self.rendered_wire.x()
+                if event.x() < self.rendered_wire.start.x():
+                    self.rendered_wire.move(self.rendered_wire.x() + new_width, self.rendered_wire.y())
+                    self.rendered_wire.setFixedWidth(self.rendered_wire.start.x() - self.rendered_wire.x())
+                else:
+                    self.rendered_wire.move(self.rendered_wire.start.x(), self.rendered_wire.y())
+                    self.rendered_wire.setFixedWidth(new_width)
+            elif self.rendered_wire.direction == Direction.vertical:
+                new_height = event.y() - self.rendered_wire.y()
+                if event.y() < self.rendered_wire.start.y():
+                    self.rendered_wire.move(self.rendered_wire.x(), self.rendered_wire.y() + new_height)
+                    self.rendered_wire.setFixedHeight(self.rendered_wire.start.y() - self.rendered_wire.y())
+                else:
+                    self.rendered_wire.move(self.rendered_wire.x(), self.rendered_wire.start.y())
+                    self.rendered_wire.setFixedHeight(new_height)

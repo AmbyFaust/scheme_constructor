@@ -24,8 +24,8 @@ class PrimitiveWidget(QWidget):
 
         self.dragging = False
         self.offset = QPoint(
-            int(primitive_width / 2),
-            int(primitive_height / 2)
+            primitive_width // 2,
+            primitive_height // 2
         )
 
         self.__create_widgets()
@@ -87,12 +87,12 @@ class PrimitiveWidget(QWidget):
     def mouseMoveEvent(self, event):
         if self.dragging:
             x_possible = (
-                int(self.width() / 2),
-                rendering_widget_width - int(self.width() / 2)
+                self.width() // 2,
+                rendering_widget_width - self.width() // 2
             )
             y_possible = (
-                int(self.height() / 2),
-                rendering_widget_height - int(self.height() / 2)
+                self.height() // 2,
+                rendering_widget_height - self.height() // 2
             )
             pos = self.pos() + event.pos()
             cursor_x = pos.x()

@@ -5,7 +5,25 @@ from PyQt5.QtGui import QPainter, QColor, QCursor
 from PyQt5.QtWidgets import QWidget, QAction, QMenu
 
 from gui.rendering_controller import RenderingController
+from gui.wire_widget import WireWidget, Direction
 from settings import pin_width, pin_height
+
+
+class PossiblePoints:
+    def __init__(self, connected_widget, offset):
+        self.top = []
+        self.bottom = []
+        self.right = []
+        self.left = []
+        self.all = []
+
+        for dx in range(1, connected_widget.width() - 1):
+            self.top.append(QPoint(dx, 0) - offset)
+            self.bottom.append(QPoint(dx, connected_widget.height()) - offset)
+        for dy in range(1, connected_widget.height() - 1):
+            self.left.append(QPoint(0, dy) - offset)
+            self.right.append(QPoint(connected_widget.width(), dy) - offset)
+        self.all = self.top + self.bottom + self.right + self.left
 
 
 class PinWidget(QWidget):
@@ -23,10 +41,13 @@ class PinWidget(QWidget):
 
         self.dragging = False
         self.offset = QPoint(
-            int(self.width() / 2),
-            int(self.height() / 2)
+            self.width() // 2,
+            self.height() // 2
         )
-        self.pin_possible_move_points = self.get_pin_possible_points()
+        self.pin_possible_move_points = PossiblePoints(
+            self.connected_widget,
+            self.offset
+        )
 
         self.__set_widgets()
         self.__set_layouts()
@@ -34,8 +55,8 @@ class PinWidget(QWidget):
         self.__create_actions()
 
         self.move(
-            connected_widget.x() + int(connected_widget.width() / 2) - int(self.width() / 2),
-            connected_widget.y() + connected_widget.height() - int(self.height() / 2)
+            connected_widget.x() + connected_widget.width() // 2 - self.width() // 2,
+            connected_widget.y() + connected_widget.height() - self.height() // 2
         )
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.show_context_menu)
@@ -88,27 +109,15 @@ class PinWidget(QWidget):
     def calc_distance(self, a: QPoint, b: QPoint):
         return ((a.x() - b.x())**2 + (a.y() - b.y())**2)**0.5
 
-    def get_pin_possible_points(self):
-        possible_points = []
-
-        for dx in range(self.connected_widget.width()):
-            possible_points.append(QPoint(dx, 0) - self.offset)
-            possible_points.append(QPoint(dx, self.connected_widget.height()) - self.offset)
-        for dy in range(self.connected_widget.height()):
-            possible_points.append(QPoint(0, dy) - self.offset)
-            possible_points.append(QPoint(self.connected_widget.width(), dy) - self.offset)
-
-        return possible_points
-
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             QCursor.setPos(self.mapToGlobal(self.offset))
             self.dragging = True
 
     def mouseMoveEvent(self, event):
-        new_pos = self.pin_possible_move_points[0]
+        new_pos = self.pin_possible_move_points.all[0]
         min_distance = math.inf
-        for point in self.pin_possible_move_points:
+        for point in self.pin_possible_move_points.all:
             distance = self.calc_distance(self.connected_widget.pos() + point, self.pos() + event.pos())
             if distance < min_distance:
                 new_pos = point
@@ -127,7 +136,17 @@ class PinWidget(QWidget):
         self.deleteLater()
 
     def add_wire(self):
-        pass
+        pos_in_conn_widget = self.pos() - self.connected_widget.pos()
+        direction = Direction.vertical
+        if (pos_in_conn_widget in self.pin_possible_move_points.left) \
+                or (pos_in_conn_widget in self.pin_possible_move_points.right):
+            direction = Direction.horizontal
+        self.wire = WireWidget(self.parent(), self.pos() + self.offset, direction
+        )
+        print(direction)
+        self.wire.stackUnder(self.connected_widget)
+        self.parent().rendered_wire = self.wire
+        self.wire.show()
 
     def __del__(self):
         print('уняня')
