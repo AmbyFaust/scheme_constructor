@@ -1,5 +1,5 @@
 from PyQt5.QtCore import Qt, QPoint
-from PyQt5.QtGui import QCursor
+from PyQt5.QtGui import QCursor, QMouseEvent
 from PyQt5.QtWidgets import QWidget, QAction, QMenu, QLabel, QVBoxLayout, QDialog
 
 from core.schema_classes import Block
@@ -14,7 +14,6 @@ class BlockWidget(QWidget):
         super(BlockWidget, self).__init__(parent)
         self.setAttribute(Qt.WA_StyledBackground, True)
         self.controller = controller
-        self.unlock()
         self.block = block
         self.move(block.get_left(), block.get_top())
         self.setFixedWidth(block.get_width())
@@ -31,13 +30,15 @@ class BlockWidget(QWidget):
         self.__create_widgets()
         self.__create_layouts()
         self.__create_actions()
+        self.unlock()
+
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.show_context_menu)
 
     def destructor(self):
         for pin_widget in self.pin_widgets:
             pin_widget.destructor()
-            pin_widget.deleteLater()
+        self.pin_widgets.clear()
 
     def __create_widgets(self):
         self.name_label = QLabel(self.block.get_name())
@@ -69,6 +70,9 @@ class BlockWidget(QWidget):
         self.setStyleSheet("border: 2px solid black; background-color: #42aaff;")
 
     def unlock(self):
+        for pin in self.pin_widgets:
+            if pin.wire:
+                return
         self.setStyleSheet("border: 0px solid black; background-color: #42aaff;")
 
     def delete(self):
@@ -86,7 +90,7 @@ class BlockWidget(QWidget):
             self.name_label.setText(self.block.get_name())
 
     def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.LeftButton and not self.parent().rendered_wire:
             for pin_widget in self.pin_widgets:
                 if pin_widget.wire:
                     return
@@ -127,7 +131,13 @@ class BlockWidget(QWidget):
                 pin_widget.move(new_pos_pin)
             self.move(new_pos)
         else:
-            self.parent().mouseMoveEvent(event.pos() + self.pos())
+            new_event = QMouseEvent(event.type(),
+                                    event.pos() + self.pos(),
+                                    event.screenPos(),
+                                    event.button(),
+                                    event.buttons(),
+                                    event.modifiers())
+            self.parent().mouseMoveEvent(new_event)
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:

@@ -72,14 +72,16 @@ class RenderingWidget(QWidget):
             elif self.rendered_wire.start.y() < self.rendered_wire.end.y():
                 delta = -QPoint(0, width_wire // 2 + 1)
             next_wire = WireWidget(self, event.pos() + delta, Direction.get_another(self.rendered_wire.direction))
+            next_wire.stackUnder(self.rendered_wire)
             self.rendered_wire.connected_wires.append(next_wire)
             next_wire.connected_wires.append(self.rendered_wire)
             next_wire.stackUnder(self.rendered_wire)
             self.rendered_wire = next_wire
             self.rendered_wire.show()
 
-        # elif event.button() == Qt.RightButton and self.rendered_wire:
-
+        elif event.button() == Qt.RightButton and self.rendered_wire:
+            self.rendered_wire.delete()
+            self.rendered_wire = None
 
     def mouseMoveEvent(self, event):
         if self.rendered_wire:

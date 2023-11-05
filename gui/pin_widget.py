@@ -1,7 +1,7 @@
 import math
 
 from PyQt5.QtCore import Qt, QPoint
-from PyQt5.QtGui import QPainter, QColor, QCursor, QPen
+from PyQt5.QtGui import QPainter, QColor, QCursor, QPen, QMouseEvent
 from PyQt5.QtWidgets import QWidget, QAction, QMenu
 
 from gui.rendering_controller import RenderingController
@@ -66,9 +66,11 @@ class PinWidget(QWidget):
         self.unlock()
         self.setMouseTracking(True)
 
-
     def destructor(self):
         self.connected_widget = None
+        if self.wire:
+            self.wire.delete()
+        self.deleteLater()
 
     def __set_widgets(self):
         pass
@@ -90,7 +92,8 @@ class PinWidget(QWidget):
     def show_context_menu(self, position):
         context_menu = QMenu(self)
         context_menu.setStyleSheet("background-color: gray;")
-        context_menu.addAction(self.add_wire_action)
+        if not self.wire:
+            context_menu.addAction(self.add_wire_action)
         context_menu.addAction(self.set_name_action)
         context_menu.addAction(self.del_action)
         context_menu.exec(self.mapToGlobal(position))
@@ -105,6 +108,10 @@ class PinWidget(QWidget):
     def unlock(self):
         self.border = Qt.NoPen
         self.color = QColor(255, 0, 0)
+        try:
+            self.connected_widget.unlock()
+        except Exception:
+            pass
         self.update()
 
     def paintEvent(self, event):
@@ -138,30 +145,36 @@ class PinWidget(QWidget):
                         or (pos_in_conn_widget in self.pin_possible_move_points.right):
                     pin_direction = Direction.horizontal
                     delta = QPoint(0, width_wire // 2 + 1)
-                if self.wire == wire or pin_direction != wire.direction:
+                if self.wire or pin_direction != wire.direction:
                     return
-                wire.connected_widget = self
+                wire.connected_pins.append(self)
                 wire.set_location(end=self.pos() + self.offset)
                 self.move(wire.end - self.offset + delta)
                 self.wire = wire
                 self.parent().rendered_wire = None
                 self.lock()
-                return
-            QCursor.setPos(self.mapToGlobal(self.offset))
-            self.dragging = True
+            else:
+                QCursor.setPos(self.mapToGlobal(self.offset))
+                self.dragging = True
 
     def mouseMoveEvent(self, event):
         if self.dragging and not self.wire:
             new_pos = self.pin_possible_move_points.all[0]
             min_distance = math.inf
             for point in self.pin_possible_move_points.all:
-                distance = self.calc_distance(self.connected_widget.pos() + point, self.pos() + event.pos())
+                distance = self.calc_distance(self.connected_widget.pos() + point, self.pos() + event.pos() - self.offset)
                 if distance < min_distance:
                     new_pos = point
                     min_distance = distance
             self.move(self.connected_widget.pos() + new_pos)
         else:
-            self.parent().mouseMoveEvent(event.pos() + self.pos())
+            new_event = QMouseEvent(event.type(),
+                                    event.pos() + self.pos(),
+                                    event.screenPos(),
+                                    event.button(),
+                                    event.buttons(),
+                                    event.modifiers())
+            self.parent().mouseMoveEvent(new_event)
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -172,7 +185,8 @@ class PinWidget(QWidget):
 
     def delete(self):
         self.connected_widget.pin_widgets.remove(self)
-        self.deleteLater()
+        self.connected_widget.unlock()
+        self.destructor()
 
     def add_wire(self):
         pos_in_conn_widget = self.pos() - self.connected_widget.pos()
@@ -183,12 +197,8 @@ class PinWidget(QWidget):
             direction = Direction.horizontal
             delta = QPoint(0, width_wire // 2 + 1)
 
-        self.wire = WireWidget(self.parent(), self.pos() + self.offset - delta, direction)
-        print(direction)
+        self.wire = WireWidget(self.parent(), self.pos() + self.offset - delta, direction, self)
         self.wire.stackUnder(self.connected_widget)
         self.parent().rendered_wire = self.wire
         self.wire.show()
         self.lock()
-
-    def __del__(self):
-        print('уняня')
