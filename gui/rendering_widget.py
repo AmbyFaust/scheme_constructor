@@ -99,6 +99,6 @@ class RenderingWidget(QWidget):
                     last_pos_cursor_screen.x() - delta_x + width_wire // 2 + 1,
                     last_pos_cursor_screen.y()
                 )
-            end = QPoint(event.x(), event.y())
-            self.rendered_wire.set_location(end=end)
+            point = QPoint(event.x(), event.y())
+            self.rendered_wire.set_location(point=point)
 

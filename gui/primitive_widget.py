@@ -68,7 +68,8 @@ class PrimitiveWidget(QWidget):
         context_menu.addAction(self.add_pin_action)
         context_menu.addAction(self.set_name_action)
         context_menu.addAction(self.del_action)
-        context_menu.exec(self.mapToGlobal(position))
+        if not self.parent().rendered_wire:
+            context_menu.exec(self.mapToGlobal(position))
 
     def delete(self):
         self.parent().del_primitive(self)

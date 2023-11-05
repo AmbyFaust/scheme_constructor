@@ -64,7 +64,8 @@ class BlockWidget(QWidget):
         context_menu.addAction(self.add_pin_action)
         context_menu.addAction(self.set_name_action)
         context_menu.addAction(self.del_action)
-        context_menu.exec(self.mapToGlobal(position))
+        if not self.parent().rendered_wire:
+            context_menu.exec(self.mapToGlobal(position))
 
     def lock(self):
         self.setStyleSheet("border: 2px solid black; background-color: #42aaff;")
