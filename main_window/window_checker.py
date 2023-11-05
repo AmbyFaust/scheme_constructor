@@ -33,9 +33,6 @@ class WindowChecker(QWidget):
         layout.addWidget(self.tree)
         self.setLayout(layout)
 
-        # self.button = QPushButton(self)
-        # self.button.setText('Run checker')
-        # self.button.clicked.connect(self.run_button)
 
     def openMenu(self, position):
         mdlIdx = self.tree.indexAt(position)
