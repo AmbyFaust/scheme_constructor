@@ -5,6 +5,9 @@ from PyQt5.QtWidgets import QApplication, QMenu, QMainWindow, QWidget, QPushButt
 from window_checker import WindowChecker
 from window_redactor import WindowRedactor
 
+from subprocess import Popen, PIPE
+import os
+
 
 class MainWindow(QMainWindow):
     """
@@ -17,7 +20,7 @@ class MainWindow(QMainWindow):
         self.setMinimumHeight(200)
 
         self.redactor = WindowRedactor()
-        self.checker = WindowChecker()
+        self.checker = WindowChecker(dir_path="../scheme_json_files/")
 
         self.button_redactor = QPushButton(self, text="Open Redactor")
         self.button_redactor.move(50, 100)
@@ -49,3 +52,9 @@ if __name__ == '__main__':
     w = MainWindow()
     w.show()
     sys.exit(app.exec_())
+
+    # FNULL = open(os.devnull, 'w')  # use this if you want to suppress output to stdout from the subprocess
+    # filename = "my_file.txt"
+    # args = "../stubs/stub_checker.exe " + filename
+    # output = subprocess.run(args, capture_output=True)
+    # print(f"out: {output.stdout}, \nerror: {output.stderr}")
