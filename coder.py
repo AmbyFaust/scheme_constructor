@@ -20,7 +20,7 @@ def code_pins(pins):
             'name': pin.get_name(),
             'top_left': pin.get_top_left()
         }
-        list_of_pins.append(converting_to_json(pin_dictionary))
+        list_of_pins.append(pin_dictionary)
     return list_of_pins
 
 
@@ -38,7 +38,7 @@ def code_pin_nets(pin_nets):
             'pins': code_pins(pn.get_pins()),
             'lines': pn.get_lines()
         }
-        list_of_pin_nets.append(converting_to_json(pin_nets_dictionary))
+        list_of_pin_nets.append(pin_nets_dictionary)
     return list_of_pin_nets
 
 
@@ -63,7 +63,7 @@ def code_objects(objects):
             obj_dictionary['pins'] = code_pins(obj.get_pins())
         if (link != ''):
             obj_dictionary['link'] = link
-        list_of_objects.append(converting_to_json(obj_dictionary))
+        list_of_objects.append(obj_dictionary)
     return list_of_objects
 
 
