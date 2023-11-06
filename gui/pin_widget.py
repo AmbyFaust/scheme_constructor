@@ -69,6 +69,7 @@ class PinWidget(QWidget):
         self.connected_widget = None
         if self.wire:
             self.wire.delete()
+        self.parent().pin_widgets.pop(self)
         self.deleteLater()
 
     def __set_widgets(self):
@@ -202,9 +203,9 @@ class PinWidget(QWidget):
                 or (pos_in_conn_widget in self.pin_possible_move_points.right):
             direction = Direction.horizontal
             delta = QPoint(0, width_wire // 2 + 1)
-
-        self.wire = WireWidget(self.parent(), self.pos() + self.offset - delta, direction, self)
-        self.wire.stackUnder(self.connected_widget)
+        pos = self.pos() + self.offset - delta
+        self.wire = WireWidget(self.parent(), pos, pos, direction, self)
+        self.wire.lower()
         self.parent().rendered_wire = self.wire
         self.wire.show()
         self.lock()

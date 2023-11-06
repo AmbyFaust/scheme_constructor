@@ -6,18 +6,18 @@ from settings import crossroad_width, crossroad_height
 
 
 class CrossroadWidget(QWidget):
-    def __init__(self, parent, wires, x: int, y: int):
+    def __init__(self, parent, wires: list, pos: QPoint):
         super(CrossroadWidget, self).__init__(parent)
         self.setAttribute(Qt.WA_StyledBackground, True)
         self.setFixedWidth(crossroad_width)
         self.setFixedHeight(crossroad_height)
         self.setStyleSheet("border: 1px black;")
-        self.wires = wires
+        self.connected_wires = wires
         self.offset = QPoint(
             self.width() // 2,
             self.height() // 2
         )
-        self.move(x, y)
+        self.move(pos)
 
 
     def paintEvent(self, event):

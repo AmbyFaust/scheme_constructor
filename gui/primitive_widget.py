@@ -77,6 +77,7 @@ class PrimitiveWidget(QWidget):
     def add_pin(self):
         pin_widget = PinWidget(self.parent(), self)
         self.pin_widgets.append(pin_widget)
+        self.parent().pin_widgets[pin_widget] = True
         pin_widget.show()
 
     def set_name(self):

@@ -24,6 +24,7 @@ class RenderingWidget(QWidget):
 
         self.primitives_widgets = []
         self.block_widgets = []
+        self.pin_widgets = {}
 
         self.rendered_wire = None
 
@@ -61,21 +62,29 @@ class RenderingWidget(QWidget):
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton and self.rendered_wire:
+            for pin_widget in self.pin_widgets:
+                if pin_widget.geometry().contains(event.pos()):
+                    new_event = QMouseEvent(event.type(),
+                                            event.pos() - self.pos(),
+                                            event.screenPos(),
+                                            event.button(),
+                                            event.buttons(),
+                                            event.modifiers())
+                    pin_widget.mousePressEvent(new_event)
+                    return
+
             self.rendered_wire.drawing = False
             delta = QPoint()
-            if self.rendered_wire.start.x() > self.rendered_wire.end.x():
-                delta = -QPoint(width_wire // 2 + 1, 0)
-            elif self.rendered_wire.start.x() < self.rendered_wire.end.x():
-                delta = -QPoint(width_wire // 2 + 1, 0)
-            elif self.rendered_wire.start.y() > self.rendered_wire.end.y():
-                delta = -QPoint(0, width_wire // 2 + 1)
-            elif self.rendered_wire.start.y() < self.rendered_wire.end.y():
-                delta = -QPoint(0, width_wire // 2 + 1)
-            next_wire = WireWidget(self, event.pos() + delta, Direction.get_another(self.rendered_wire.direction))
-            next_wire.stackUnder(self.rendered_wire)
+
+            if self.rendered_wire.direction == Direction.horizontal:
+                delta = QPoint(width_wire // 2 + 1, 0)
+            elif self.rendered_wire.direction == Direction.vertical:
+                delta = QPoint(0, width_wire // 2 + 1)
+            pos = event.pos() - delta
+            next_wire = WireWidget(self, pos, pos, Direction.get_another(self.rendered_wire.direction))
+            next_wire.lower()
             self.rendered_wire.connected_wires.append(next_wire)
             next_wire.connected_wires.append(self.rendered_wire)
-            next_wire.stackUnder(self.rendered_wire)
             self.rendered_wire = next_wire
             self.rendered_wire.show()
 
