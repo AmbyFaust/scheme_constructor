@@ -4,16 +4,14 @@ from PyQt5.QtWidgets import QWidget, QAction, QMenu, QLabel, QVBoxLayout, QDialo
 
 from core.schema_classes import Block
 from gui.pin_widget import PinWidget
-from gui.rendering_controller import RenderingController
 from gui.set_name_dialog import SetNameDialog
 from settings import rendering_widget_width, rendering_widget_height
 
 
 class BlockWidget(QWidget):
-    def __init__(self, parent=None, controller: RenderingController = None, block: Block = None):
+    def __init__(self, parent, block: Block):
         super(BlockWidget, self).__init__(parent)
         self.setAttribute(Qt.WA_StyledBackground, True)
-        self.controller = controller
         self.block = block
         self.move(block.get_left(), block.get_top())
         self.setFixedWidth(block.get_width())
@@ -34,6 +32,8 @@ class BlockWidget(QWidget):
 
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.show_context_menu)
+
+        self.setMouseTracking(True)
 
     def destructor(self):
         for pin_widget in self.pin_widgets:

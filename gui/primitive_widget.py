@@ -1,22 +1,18 @@
-import typing
 
-from PyQt5 import QtGui
-from PyQt5.QtCore import QRect, QPoint, Qt
-from PyQt5.QtGui import QPainter, QCursor, QMouseEvent
+from PyQt5.QtCore import QPoint, Qt
+from PyQt5.QtGui import QCursor, QMouseEvent
 from PyQt5.QtWidgets import QWidget, QMenu, QAction, QVBoxLayout, QLabel, QDialog
 
 from core.schema_classes import Primitive
 from gui.pin_widget import PinWidget
-from gui.rendering_controller import RenderingController
 from gui.set_name_dialog import SetNameDialog
 from settings import primitive_width, primitive_height, rendering_widget_width, rendering_widget_height
 
 
 class PrimitiveWidget(QWidget):
-    def __init__(self, parent, primitive: Primitive, controller: RenderingController = None):
+    def __init__(self, parent, primitive: Primitive):
         super(PrimitiveWidget, self).__init__(parent)
         self.setAttribute(Qt.WA_StyledBackground, True)
-        self.controller = controller
         self.primitive = primitive
         self.move(primitive.get_left(), primitive.get_top())
         self.setFixedWidth(primitive.get_width())
@@ -34,6 +30,7 @@ class PrimitiveWidget(QWidget):
         self.__create_layouts()
         self.__create_actions()
         self.unlock()
+
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.show_context_menu)
 
@@ -71,6 +68,15 @@ class PrimitiveWidget(QWidget):
         if not self.parent().rendered_wire:
             context_menu.exec(self.mapToGlobal(position))
 
+    def lock(self):
+        self.setStyleSheet("border: 2px solid black; background-color: #cccccc;")
+
+    def unlock(self):
+        for pin in self.pin_widgets:
+            if pin.wire:
+                return
+        self.setStyleSheet("border: 0px solid black; background-color: #cccccc;")
+
     def delete(self):
         self.parent().del_primitive(self)
 
@@ -85,15 +91,6 @@ class PrimitiveWidget(QWidget):
         if set_name_dialog.exec_() == QDialog.Accepted:
             self.primitive.set_name(set_name_dialog.name_edit.text())
             self.name_label.setText(self.primitive.get_name())
-
-    def lock(self):
-        self.setStyleSheet("border: 2px solid black; background-color: #cccccc;")
-
-    def unlock(self):
-        for pin in self.pin_widgets:
-            if pin.wire:
-                return
-        self.setStyleSheet("border: 0px solid black; background-color: #cccccc;")
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton and not self.parent().rendered_wire:

@@ -5,25 +5,17 @@ from PyQt5.QtGui import QPainter, QPen, QCursor, QMouseEvent
 from PyQt5.QtWidgets import QWidget, QAction, QMenu
 
 from gui.crossroad_widget import CrossroadWidget
+from gui.direction_enum import Direction
 from gui.rendering_controller import RenderingController
 from settings import width_wire, rendering_widget_width, rendering_widget_height
 
 
-class Direction(Enum):
-    horizontal = 0
-    vertical = 1
 
-    @classmethod
-    def get_another(cls, direction):
-        if direction == cls.horizontal:
-            return cls.vertical
-        else:
-            return cls.horizontal
 
 
 class WireWidget(QWidget):
     def __init__(self, parent, start: QPoint, end: QPoint,
-                 direction: Direction, connected_pin=None):
+                 direction: Direction, connected_pin=None, connected_crossroad=None):
         super(WireWidget, self).__init__(parent)
         self.setAttribute(Qt.WA_StyledBackground, True)
         self.setStyleSheet("border: 0px black;")
@@ -35,6 +27,8 @@ class WireWidget(QWidget):
             self.connected_pins.append(connected_pin)
 
         self.connected_crossroads = []
+        if connected_crossroad:
+            self.connected_crossroads.append(connected_crossroad)
         self.move(start)
         self.start = start
         self.end = end
@@ -193,6 +187,11 @@ class WireWidget(QWidget):
         for wire in self.connected_wires:
             wire.connected_wires.remove(self)
             wire.delete()
+
+        for crossroads_widget in self.connected_crossroads:
+            if len(crossroads_widget.connected_wires) <= 2:
+                crossroads_widget.connected_wires.remove(self)
+                crossroads_widget.delete()
         self.deleteLater()
 
     def calc_distance(self, a: QPoint, b: QPoint):

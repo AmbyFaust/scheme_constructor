@@ -4,7 +4,6 @@ from PyQt5.QtCore import Qt, QPoint
 from PyQt5.QtGui import QPainter, QColor, QCursor, QPen, QMouseEvent
 from PyQt5.QtWidgets import QWidget, QAction, QMenu
 
-from gui.rendering_controller import RenderingController
 from gui.wire_widget import WireWidget, Direction
 from settings import pin_width, pin_height, width_wire
 
@@ -51,10 +50,8 @@ class PinWidget(QWidget):
             self.offset
         )
 
-        self.__set_widgets()
-        self.__set_layouts()
-        self.__set_connections()
         self.__create_actions()
+        self.unlock()
 
         self.move(
             connected_widget.x() + connected_widget.width() // 2 - self.width() // 2,
@@ -62,7 +59,6 @@ class PinWidget(QWidget):
         )
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.show_context_menu)
-        self.unlock()
         self.setMouseTracking(True)
 
     def destructor(self):
@@ -71,15 +67,6 @@ class PinWidget(QWidget):
             self.wire.delete()
         self.parent().pin_widgets.pop(self)
         self.deleteLater()
-
-    def __set_widgets(self):
-        pass
-
-    def __set_layouts(self):
-        pass
-
-    def __set_connections(self):
-        pass
 
     def __create_actions(self):
         self.add_wire_action = QAction("Добавить провод", self)
@@ -99,6 +86,17 @@ class PinWidget(QWidget):
         if not self.parent().rendered_wire:
             context_menu.exec(self.mapToGlobal(position))
 
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setBrush(self.color)
+        painter.setPen(self.border)
+
+        # Рисуем круг в центре виджета
+        rect = self.rect()
+        diameter = min(rect.width(), rect.height())
+        painter.drawEllipse((rect.width() - diameter) // 2, (rect.height() - diameter) // 2, diameter, diameter)
+
     def lock(self):
         self.border = QPen(Qt.black)
         self.border.setWidth(1)
@@ -114,17 +112,6 @@ class PinWidget(QWidget):
         except Exception:
             pass
         self.update()
-
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
-        painter.setBrush(self.color)
-        painter.setPen(self.border)
-
-        # Рисуем круг в центре виджета
-        rect = self.rect()
-        diameter = min(rect.width(), rect.height())
-        painter.drawEllipse((rect.width() - diameter) // 2, (rect.height() - diameter) // 2, diameter, diameter)
 
     def set_pin_connection(self, pin_connection):
         self.pin_connection = pin_connection
