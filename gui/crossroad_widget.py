@@ -66,15 +66,39 @@ class CrossroadWidget(QWidget):
             start=pos,
             end=pos,
             direction=direction,
-            connected_crossroad=self
+            connected_pins=[],
+            connected_crossroads=[self]
         )
         self.connected_wires.append(new_wire)
         new_wire.lower()
         self.parent().rendered_wire = new_wire
 
     def delete(self):
+        pass
+
+    # def single_delete(self):
+    #     if len(self.connected_wires) != 2:
+    #         print('Не удалось совершить single_delete для crossroad_widget')
+    #         return
+    #
+    #     wire1 = self.connected_wires[0]
+    #     wire2 = self.connected_wires[1]
+    #
+    #     start, end = QPoint(), QPoint
+    #     if wire1.start.x() < wire2.start.x() or wire1.start.y() < wire2.start.y():
+    #         start, end = wire1.start, wire2.end
+    #     else:
+    #         start, end = wire2.start, wire1.end
+    #     merge_wire = self.parent().add_wire(
+    #         start=start,
+    #         start=end,
+    #
+    #     )
+
+    def cascade_delete(self):
         for wire_widget in self.connected_wires:
             wire_widget.connected_crossroads.remove(self)
-            wire_widget.delete()
+            if len(self.connected_wires) <= 1:
+                wire_widget.delete()
         self.connected_wires.clear()
         self.deleteLater()

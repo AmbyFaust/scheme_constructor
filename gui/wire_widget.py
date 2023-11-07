@@ -6,29 +6,24 @@ from PyQt5.QtWidgets import QWidget, QAction, QMenu
 
 from gui.crossroad_widget import CrossroadWidget
 from gui.direction_enum import Direction
-from gui.rendering_controller import RenderingController
 from settings import width_wire, rendering_widget_width, rendering_widget_height
 
 
-
-
-
 class WireWidget(QWidget):
-    def __init__(self, parent, start: QPoint, end: QPoint,
-                 direction: Direction, connected_pin=None, connected_crossroad=None):
+    def __init__(self, parent, start: QPoint, end: QPoint, direction: Direction,
+                 connected_pins: list = [], connected_crossroads: list = []):
         super(WireWidget, self).__init__(parent)
         self.setAttribute(Qt.WA_StyledBackground, True)
         self.setStyleSheet("border: 0px black;")
         self.connected_wires = []
         self.direction = direction
 
-        self.connected_pins = []
-        if connected_pin:
-            self.connected_pins.append(connected_pin)
+        self.connected_pins = connected_pins
+        for pin_widget in self.connected_pins:
+            pin_widget.lock()
 
-        self.connected_crossroads = []
-        if connected_crossroad:
-            self.connected_crossroads.append(connected_crossroad)
+        self.connected_crossroads = connected_crossroads
+
         self.move(start)
         self.start = start
         self.end = end
@@ -93,20 +88,22 @@ class WireWidget(QWidget):
             wire1_end = QPoint(self.end.x(), self.start.y() + delta)
             wire2_start = QPoint(self.start.x(), self.start.y() + delta)
 
-        wire1 = WireWidget(
-            self.parent(),
-            self.start,
-            wire1_end,
-            self.direction
+        wire1 = self.parent().add_wire(
+            start=self.start,
+            end=wire1_end,
+            direction=self.direction,
+            connected_pins=[],
+            connected_crossroads=[]
         )
         wire1.set_location(wire1_end)
         wire1.lower()
 
-        wire2 = WireWidget(
-            self.parent(),
-            wire2_start,
-            self.end,
-            self.direction
+        wire2 = self.parent().add_wire(
+            start=wire2_start,
+            end=self.end,
+            direction=self.direction,
+            connected_pins=[],
+            connected_crossroads=[]
         )
         wire2.set_location(self.end)
         wire2.lower()
@@ -145,15 +142,6 @@ class WireWidget(QWidget):
         wire1.show()
         wire2.show()
 
-        # crossroad_pos = QPoint()
-        # if self.direction == Direction.horizontal:
-        #     crossroad_pos = QPoint(
-        #         self.start.x() + self.width() // 2 - ,
-        #         self.start.y() + self.height() // 2 - width_wire // 2
-        #     )
-        # elif self.direction == Direction.vertical:
-
-
         crossroad_widget = CrossroadWidget(
             self.parent(),
             [wire1, wire2],
@@ -163,7 +151,6 @@ class WireWidget(QWidget):
             )
         )
         crossroad_widget.move(crossroad_widget.pos() - crossroad_widget.offset)
-        print(crossroad_widget.pos(), wire1.end, wire2.start)
         wire1.connected_crossroads.append(crossroad_widget)
         wire2.connected_crossroads.append(crossroad_widget)
 
@@ -173,9 +160,7 @@ class WireWidget(QWidget):
         self.connected_crossroads.clear()
         self.connected_pins.clear()
 
-        self.deleteLater()
-
-
+        self.delete()
 
     def delete(self):
         if self.connected_pins:
@@ -189,9 +174,12 @@ class WireWidget(QWidget):
             wire.delete()
 
         for crossroads_widget in self.connected_crossroads:
-            if len(crossroads_widget.connected_wires) <= 2:
-                crossroads_widget.connected_wires.remove(self)
-                crossroads_widget.delete()
+            crossroads_widget.connected_wires.remove(self)
+            if len(crossroads_widget.connected_wires) <= 1:
+                crossroads_widget.cascade_delete()
+
+        if self in self.parent().wire_widgets:
+            self.parent().wire_widgets.pop(self)
         self.deleteLater()
 
     def calc_distance(self, a: QPoint, b: QPoint):

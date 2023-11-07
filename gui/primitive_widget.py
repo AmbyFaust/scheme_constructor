@@ -36,11 +36,6 @@ class PrimitiveWidget(QWidget):
 
         self.setMouseTracking(True)
 
-    def destructor(self):
-        for pin_widget in self.pin_widgets:
-            pin_widget.destructor()
-        self.pin_widgets.clear()
-
     def __create_widgets(self):
         self.name_label = QLabel(self.primitive.get_name())
         self.name_label.setStyleSheet('border: 0px ')
@@ -78,13 +73,14 @@ class PrimitiveWidget(QWidget):
         self.setStyleSheet("border: 0px solid black; background-color: #cccccc;")
 
     def delete(self):
-        self.parent().del_primitive(self)
+        for pin_widget in self.pin_widgets:
+            pin_widget.delete()
+        self.pin_widgets.clear()
+        self.parent().primitives_widgets.pop(self)
+        self.deleteLater()
 
     def add_pin(self):
-        pin_widget = PinWidget(self.parent(), self)
-        self.pin_widgets.append(pin_widget)
-        self.parent().pin_widgets[pin_widget] = True
-        pin_widget.show()
+        self.parent().add_pin(self)
 
     def set_name(self):
         set_name_dialog = SetNameDialog(self.name_label.text())

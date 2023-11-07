@@ -61,12 +61,7 @@ class PinWidget(QWidget):
         self.customContextMenuRequested.connect(self.show_context_menu)
         self.setMouseTracking(True)
 
-    def destructor(self):
-        self.connected_widget = None
-        if self.wire:
-            self.wire.delete()
-        self.parent().pin_widgets.pop(self)
-        self.deleteLater()
+
 
     def __create_actions(self):
         self.add_wire_action = QAction("Добавить провод", self)
@@ -112,6 +107,36 @@ class PinWidget(QWidget):
         except Exception:
             pass
         self.update()
+
+    def delete(self):
+        self.connected_widget.pin_widgets.remove(self)
+        self.connected_widget.unlock()
+        self.connected_widget = None
+        if self.wire:
+            self.wire.delete()
+        self.parent().pin_widgets.pop(self)
+        self.deleteLater()
+
+    def add_wire(self):
+        pos_in_conn_widget = self.pos() - self.connected_widget.pos()
+        direction = Direction.vertical
+        delta = QPoint(width_wire // 2 + 1, 0)
+        if (pos_in_conn_widget in self.pin_possible_move_points.left) \
+                or (pos_in_conn_widget in self.pin_possible_move_points.right):
+            direction = Direction.horizontal
+            delta = QPoint(0, width_wire // 2 + 1)
+        pos = self.pos() + self.offset - delta
+        self.wire = self.parent().add_wire(
+            start=pos,
+            end=pos,
+            direction=direction,
+            connected_pins=[self],
+            connected_crossroads=[]
+        )
+        self.parent().rendered_wire = self.wire
+
+    def set_name(self):
+        pass
 
     def set_pin_connection(self, pin_connection):
         self.pin_connection = pin_connection
@@ -174,25 +199,4 @@ class PinWidget(QWidget):
         if event.button() == Qt.LeftButton:
             self.dragging = False
 
-    def set_name(self):
-        pass
 
-    def delete(self):
-        self.connected_widget.pin_widgets.remove(self)
-        self.connected_widget.unlock()
-        self.destructor()
-
-    def add_wire(self):
-        pos_in_conn_widget = self.pos() - self.connected_widget.pos()
-        direction = Direction.vertical
-        delta = QPoint(width_wire // 2 + 1, 0)
-        if (pos_in_conn_widget in self.pin_possible_move_points.left) \
-                or (pos_in_conn_widget in self.pin_possible_move_points.right):
-            direction = Direction.horizontal
-            delta = QPoint(0, width_wire // 2 + 1)
-        pos = self.pos() + self.offset - delta
-        self.wire = WireWidget(self.parent(), pos, pos, direction, self)
-        self.wire.lower()
-        self.parent().rendered_wire = self.wire
-        self.wire.show()
-        self.lock()

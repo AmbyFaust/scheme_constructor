@@ -18,10 +18,10 @@ class RenderingWidget(QWidget):
         self.setFixedWidth(rendering_widget_width)
         self.setFixedHeight(rendering_widget_height)
 
-        self.primitives_widgets = []
-        self.block_widgets = []
+        self.primitives_widgets = {}
+        self.block_widgets = {}
         self.pin_widgets = {}
-        self.wire_widgets = []
+        self.wire_widgets = {}
 
         self.rendered_wire = None
 
@@ -36,34 +36,47 @@ class RenderingWidget(QWidget):
             primitive = Primitive('primitive', [], 50, 100, 100, 50)
         primitive_widget = PrimitiveWidget(self, primitive)
         primitive_widget.show()
-
-        self.primitives_widgets.append(primitive_widget)
+        self.primitives_widgets[primitive_widget] = True
 
     def del_primitive(self, primitive_widget: PrimitiveWidget):
-        self.primitives_widgets.remove(primitive_widget)
-        primitive_widget.destructor()
-        primitive_widget.deleteLater()
+        primitive_widget.delete()
 
     def add_block(self, block: Block = None):
         if not block:
             block = Block('block', [], [], 100, 100, block_width, block_height)
         block_widget = BlockWidget(self, block)
         block_widget.show()
-
-        self.block_widgets.append(block_widget)
+        self.block_widgets[block_widget] = True
 
     def del_block(self, block_widget: BlockWidget):
-        self.block_widgets.remove(block_widget)
-        block_widget.destructor()
-        block_widget.deleteLater()
+        block_widget.delete()
 
-    def add_wire(self, start: QPoint, end: QPoint, direction: Direction, connected_pin=None, connected_crossroad=None):
-        wire_widget = WireWidget(self, start, end, direction, connected_pin, connected_crossroad)
-        self.wire_widgets.append(wire_widget)
+    def add_pin(self, connect_widget):
+        pin_widget = PinWidget(self, connect_widget)
+        connect_widget.pin_widgets.append(pin_widget)
+        pin_widget.show()
+        self.pin_widgets[pin_widget] = True
+
+    def del_pin(self, pin_widget):
+        pin_widget.delete()
+
+    def add_wire(self, start: QPoint, end: QPoint, direction: Direction,
+                 connected_pins: list, connected_crossroads: list):
+        wire_widget = WireWidget(self, start, end, direction, connected_pins, connected_crossroads)
+        self.wire_widgets[wire_widget] = True
+        wire_widget.lower()
         wire_widget.show()
         return wire_widget
 
+    def del_wire(self, wire_widget):
+        wire_widget.delete()
+
     def mousePressEvent(self, event):
+        print('--------')
+        print('primitives:', len(self.primitives_widgets))
+        print('blocks:', len(self.block_widgets))
+        print('pins:', len(self.pin_widgets))
+        print('wires:', len(self.wire_widgets))
         if event.button() == Qt.LeftButton and self.rendered_wire:
             for pin_widget in self.pin_widgets:
                 if pin_widget.geometry().contains(event.pos()):
@@ -84,12 +97,16 @@ class RenderingWidget(QWidget):
             elif self.rendered_wire.direction == Direction.vertical:
                 delta = QPoint(0, width_wire // 2 + 1)
             pos = event.pos() - delta
-            next_wire = WireWidget(self, pos, pos, Direction.get_another(self.rendered_wire.direction))
-            next_wire.lower()
+            next_wire = self.add_wire(
+                start=pos,
+                end=pos,
+                direction=Direction.get_another(self.rendered_wire.direction),
+                connected_pins=[],
+                connected_crossroads=[]
+            )
             self.rendered_wire.connected_wires.append(next_wire)
             next_wire.connected_wires.append(self.rendered_wire)
             self.rendered_wire = next_wire
-            self.rendered_wire.show()
 
         elif event.button() == Qt.RightButton and self.rendered_wire:
             self.rendered_wire.delete()
