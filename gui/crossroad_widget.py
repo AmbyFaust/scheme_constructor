@@ -28,7 +28,7 @@ class CrossroadWidget(QWidget):
         self.add_wire_action = QAction("Добавить провод", self)
         self.add_wire_action.triggered.connect(self.add_wire)
         self.del_action = QAction("Удалить", self)
-        self.del_action.triggered.connect(self.delete)
+        self.del_action.triggered.connect(self.single_delete)
 
     def show_context_menu(self, position):
         context_menu = QMenu(self)
@@ -73,32 +73,77 @@ class CrossroadWidget(QWidget):
         new_wire.lower()
         self.parent().rendered_wire = new_wire
 
-    def delete(self):
-        pass
 
-    # def single_delete(self):
-    #     if len(self.connected_wires) != 2:
-    #         print('Не удалось совершить single_delete для crossroad_widget')
-    #         return
-    #
-    #     wire1 = self.connected_wires[0]
-    #     wire2 = self.connected_wires[1]
-    #
-    #     start, end = QPoint(), QPoint
-    #     if wire1.start.x() < wire2.start.x() or wire1.start.y() < wire2.start.y():
-    #         start, end = wire1.start, wire2.end
-    #     else:
-    #         start, end = wire2.start, wire1.end
-    #     merge_wire = self.parent().add_wire(
-    #         start=start,
-    #         start=end,
-    #
-    #     )
+    def single_delete(self):
+        if len(self.connected_wires) != 2:
+            print('Не удалось совершить single_delete для crossroad_widget, проводов != 2')
+            return
+        if self.connected_wires[0].direction != self.connected_wires[1].direction:
+            print('Не удалось совершить single_delete для crossroad_widget, разные direction')
+            return
+
+        wire1 = self.connected_wires[0]
+        wire2 = self.connected_wires[1]
+        wire1.connected_crossroads.remove(self)
+        wire2.connected_crossroads.remove(self)
+
+        start, end = QPoint(), QPoint
+        if wire1.direction == Direction.horizontal:
+            if wire1.start.x() < wire2.start.x():
+                start, end = wire1.start, wire2.end
+            else:
+                start, end = wire2.start, wire1.end
+        else:
+            if wire1.start.y() < wire2.start.y():
+                start, end = wire1.start, wire2.end
+            else:
+                start, end = wire2.start, wire1.end
+
+        merge_wire = self.parent().add_wire(
+            start=start,
+            end=end,
+            direction=wire1.direction,
+            connected_pins=wire1.connected_pins + wire2.connected_pins,
+            connected_crossroads=wire1.connected_crossroads + wire2.connected_crossroads
+        )
+        merge_wire.set_location(merge_wire.end)
+
+        for wire_widget in wire1.connected_wires:
+            wire_widget.connected_wires.remove(wire1)
+            wire_widget.connected_wires.append(merge_wire)
+            merge_wire.connected_wires.append(wire_widget)
+
+        for wire_widget in wire2.connected_wires:
+            wire_widget.connected_wires.remove(wire2)
+            wire_widget.connected_wires.append(merge_wire)
+            merge_wire.connected_wires.append(wire_widget)
+
+        wire1.connected_wires.clear()
+        wire1.connected_pins.clear()
+        wire1.connected_crossroads.clear()
+        wire1.delete()
+
+        wire2.connected_wires.clear()
+        wire2.connected_pins.clear()
+        wire2.connected_crossroads.clear()
+        wire2.delete()
+
+        self.connected_wires.clear()
+        self.deleteLater()
 
     def cascade_delete(self):
-        for wire_widget in self.connected_wires:
-            wire_widget.connected_crossroads.remove(self)
-            if len(self.connected_wires) <= 1:
-                wire_widget.delete()
+        if len(self.connected_wires) == 1:
+            self.connected_wires[0].connected_crossroads.remove(self)
+            self.connected_wires[0].delete()
+        elif len(self.connected_wires) == 2:
+            wire1, wire2 = self.connected_wires
+            wire1.connected_crossroads.remove(self)
+            wire1.connected_wires.append(wire2)
+
+            wire2.connected_crossroads.remove(self)
+            wire2.connected_wires.append(wire1)
+        elif len(self.connected_wires) == 3:
+            return
+
         self.connected_wires.clear()
         self.deleteLater()

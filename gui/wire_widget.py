@@ -172,11 +172,12 @@ class WireWidget(QWidget):
         for wire in self.connected_wires:
             wire.connected_wires.remove(self)
             wire.delete()
+        self.connected_wires.clear()
 
         for crossroads_widget in self.connected_crossroads:
             crossroads_widget.connected_wires.remove(self)
-            if len(crossroads_widget.connected_wires) <= 1:
-                crossroads_widget.cascade_delete()
+            crossroads_widget.cascade_delete()
+        self.connected_crossroads.clear()
 
         if self in self.parent().wire_widgets:
             self.parent().wire_widgets.pop(self)
@@ -222,7 +223,7 @@ class WireWidget(QWidget):
                     self.start = self.end
                 self.se = True
                 self.end = QPoint(self.end.x(), point.y())
-            self.setFixedHeight(max(1, abs(self.end.y() - self.start.y())))
+            self.setFixedHeight(abs(self.end.y() - self.start.y()))
 
         self.move(self.start)
 
