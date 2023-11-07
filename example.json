@@ -1,0 +1,31 @@
+[
+  {
+    "type": "block",
+    "name": "main",
+    "top": 0,
+    "left": 0,
+    "width": 600,
+    "height": 400,
+    "pins": [
+      {
+        "name": "in1",
+        "top": 200,
+        "left": 0
+      },
+      {
+        "name": "out1",
+        "top": 200,
+        "left": 600
+      }
+    ],
+    "pin_nets": [
+      {
+        "name": "n1",
+        "pins": ["in1", "out1"],
+        "lines": [
+          [[200, 0], [200, 600]]
+        ]
+      }
+    ]
+  }
+]
