@@ -81,13 +81,14 @@ class RenderingWidget(QWidget):
             for pin_widget in self.pin_widgets:
                 if pin_widget.geometry().contains(event.pos()):
                     new_event = QMouseEvent(event.type(),
-                                            event.pos() - self.pos(),
+                                            event.pos() - pin_widget.pos(),
                                             event.screenPos(),
                                             event.button(),
                                             event.buttons(),
                                             event.modifiers())
                     pin_widget.mousePressEvent(new_event)
                     return
+
 
             self.rendered_wire.drawing = False
             delta = QPoint()

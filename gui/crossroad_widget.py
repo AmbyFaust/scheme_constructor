@@ -1,9 +1,9 @@
 from PyQt5.QtCore import Qt, QPoint
-from PyQt5.QtGui import QPainter, QColor
+from PyQt5.QtGui import QPainter, QColor, QMouseEvent, QCursor
 from PyQt5.QtWidgets import QWidget, QAction, QMenu
 
 from gui.direction_enum import Direction
-from settings import crossroad_width, crossroad_height, width_wire
+from settings import crossroad_width, crossroad_height, width_wire, rendering_widget_width, rendering_widget_height
 
 
 class CrossroadWidget(QWidget):
@@ -23,6 +23,8 @@ class CrossroadWidget(QWidget):
 
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.show_context_menu)
+
+        self.dragging = False
 
     def __create_actions(self):
         self.add_wire_action = QAction("Добавить провод", self)
@@ -75,6 +77,7 @@ class CrossroadWidget(QWidget):
 
 
     def single_delete(self):
+        print('single')
         if len(self.connected_wires) != 2:
             print('Не удалось совершить single_delete для crossroad_widget, проводов != 2')
             return
@@ -103,8 +106,8 @@ class CrossroadWidget(QWidget):
             start=start,
             end=end,
             direction=wire1.direction,
-            connected_pins=wire1.connected_pins + wire2.connected_pins,
-            connected_crossroads=wire1.connected_crossroads + wire2.connected_crossroads
+            connected_pins=[],
+            connected_crossroads=[]
         )
         merge_wire.set_location(merge_wire.end)
 
@@ -113,37 +116,136 @@ class CrossroadWidget(QWidget):
             wire_widget.connected_wires.append(merge_wire)
             merge_wire.connected_wires.append(wire_widget)
 
+        for pin_widget in wire1.connected_pins:
+            pin_widget.wire = merge_wire
+            merge_wire.connected_pins.append(pin_widget)
+
+        for crossroad_widget in wire1.connected_crossroads:
+            crossroad_widget.connected_wires.remove(wire1)
+            crossroad_widget.connected_wires.append(merge_wire)
+            merge_wire.connected_crossroads.append(crossroad_widget)
+
         for wire_widget in wire2.connected_wires:
             wire_widget.connected_wires.remove(wire2)
             wire_widget.connected_wires.append(merge_wire)
             merge_wire.connected_wires.append(wire_widget)
 
-        wire1.connected_wires.clear()
-        wire1.connected_pins.clear()
-        wire1.connected_crossroads.clear()
+        for pin_widget in wire2.connected_pins:
+            pin_widget.wire = merge_wire
+            merge_wire.connected_pins.append(pin_widget)
+
+        for crossroad_widget in wire2.connected_crossroads:
+            crossroad_widget.connected_wires.remove(wire2)
+            crossroad_widget.connected_wires.append(merge_wire)
+            merge_wire.connected_crossroads.append(crossroad_widget)
+
+        wire1.clear()
         wire1.delete()
 
-        wire2.connected_wires.clear()
-        wire2.connected_pins.clear()
-        wire2.connected_crossroads.clear()
+        wire2.clear()
         wire2.delete()
 
         self.connected_wires.clear()
         self.deleteLater()
 
     def cascade_delete(self):
+        print('cascade')
         if len(self.connected_wires) == 1:
             self.connected_wires[0].connected_crossroads.remove(self)
             self.connected_wires[0].delete()
-        elif len(self.connected_wires) == 2:
+        elif len(self.connected_wires) == 2 and \
+                self.connected_wires[0].direction != self.connected_wires[1].direction:
             wire1, wire2 = self.connected_wires
+
             wire1.connected_crossroads.remove(self)
             wire1.connected_wires.append(wire2)
 
             wire2.connected_crossroads.remove(self)
             wire2.connected_wires.append(wire1)
-        elif len(self.connected_wires) == 3:
+        else:
             return
 
         self.connected_wires.clear()
         self.deleteLater()
+
+    def connect_wire(self, event):
+        wire = self.parent().rendered_wire
+
+        count_vertical_wires = 0
+        count_horizontal_wires = 0
+        for wire_widget in self.connected_wires:
+            if wire_widget.direction == Direction.vertical:
+                count_vertical_wires += 1
+            elif wire_widget.direction == Direction.horizontal:
+                count_horizontal_wires += 1
+
+        if (wire.direction == Direction.horizontal and count_horizontal_wires < 2) \
+                or (wire.direction == Direction.vertical and count_vertical_wires < 2):
+            self.connected_wires.append(wire)
+            wire.move_wire(self.pos() + self.offset - wire.offset)
+            wire.connected_crossroads.append(self)
+            self.parent().rendered_wire = None
+
+
+    def mousePressEvent(self, event):
+        print(len(self.connected_wires))
+        if self.parent().rendered_wire:
+            self.connect_wire(event)
+            return
+
+        if event.button() == Qt.LeftButton:
+            QCursor.setPos(self.mapToGlobal(self.offset))
+            if len(self.connected_wires) == 2:
+                self.dragging = True
+                point = self.pos() + self.offset
+                for wire in self.connected_wires:
+                    wire.determine_se(point)
+
+    def mouseMoveEvent(self, event):
+        if self.parent().rendered_wire:
+            self.parent().mouseMoveEvent(event.pos() + self.pos())
+            return
+
+        if self.dragging:
+            x_possible = (
+                min(self.connected_wires[0].start.x(), self.connected_wires[1].start.x()) + width_wire // 2 + 1,
+                max(self.connected_wires[0].end.x(), self.connected_wires[1].end.x()) + width_wire // 2 + 1
+            )
+            y_possible = (
+                min(self.connected_wires[0].start.y(), self.connected_wires[1].start.y()),
+                max(self.connected_wires[0].end.y(), self.connected_wires[1].end.y())
+            )
+            pos = self.pos() + event.pos()
+            cursor_x = pos.x()
+            cursor_y = pos.y()
+            delta_x = 0
+            delta_y = 0
+            last_pos_cursor_screen = QCursor.pos()
+            if cursor_x < x_possible[0]:
+                delta_x = cursor_x - x_possible[0]
+            elif cursor_x > x_possible[1]:
+                delta_x = cursor_x - x_possible[1]
+            if cursor_y < y_possible[0]:
+                delta_y = cursor_y - y_possible[0]
+            elif cursor_y > y_possible[1]:
+                delta_y = cursor_y - y_possible[1]
+            QCursor.setPos(
+                last_pos_cursor_screen.x() - delta_x,
+                last_pos_cursor_screen.y() - delta_y
+            )
+            new_pos = pos - QPoint(delta_x, delta_y) - self.offset
+
+
+            if self.connected_wires[0].direction == Direction.horizontal:
+                self.move(new_pos.x(), self.y())
+            elif self.connected_wires[0].direction == Direction.vertical:
+                self.move(self.x(), new_pos.y())
+
+            point = self.pos() + self.offset
+
+            for wire in self.connected_wires:
+                wire.set_location(point=point)
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.dragging = False

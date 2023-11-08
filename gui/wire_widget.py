@@ -1,7 +1,7 @@
 from enum import Enum
 
 from PyQt5.QtCore import Qt, QPoint
-from PyQt5.QtGui import QPainter, QPen, QCursor, QMouseEvent
+from PyQt5.QtGui import QPainter, QPen, QCursor, QMouseEvent, QColor
 from PyQt5.QtWidgets import QWidget, QAction, QMenu
 
 from gui.crossroad_widget import CrossroadWidget
@@ -60,8 +60,8 @@ class WireWidget(QWidget):
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
-        pen = QPen(Qt.black)
-        pen.setWidth(1)
+        pen = QPen(QColor(0, 0, 0, 128))
+        pen.setWidth(2)
         painter.setPen(pen)
         if self.direction == Direction.horizontal:
             painter.drawLine(QPoint(0, 8), QPoint(self.width(), 8))
@@ -109,35 +109,42 @@ class WireWidget(QWidget):
         wire2.lower()
 
         for pin_widget in self.connected_pins:
-            pin_widget.wire = None
-            if self.start == pin_widget.pos() + pin_widget.offset:
+            if pin_widget.geometry().contains(wire1.start):
                 wire1.connected_pins.append(pin_widget)
                 pin_widget.wire = wire1
-            elif self.end == pin_widget.pos() + pin_widget.offset:
+            elif pin_widget.geometry().contains(wire2.end):
                 wire2.connected_pins.append(pin_widget)
                 pin_widget.wire = wire2
 
+        delta = QPoint()
+        if self.direction == Direction.horizontal:
+            delta = QPoint(0, width_wire // 2 + 1)
+        elif self.direction == Direction.vertical:
+            delta = QPoint(width_wire // 2 + 1, 0)
+
         for crossroad_widget in self.connected_crossroads:
-            crossroad_widget.wires.remove(self)
-            if self.start == crossroad_widget.pos() + crossroad_widget.offset:
+            crossroad_widget.connected_wires.remove(self)
+            if crossroad_widget.geometry().contains(wire1.start + delta):
                 wire1.connected_crossroads.append(crossroad_widget)
                 crossroad_widget.connected_wires.append(wire1)
-            elif self.end == crossroad_widget.pos() + crossroad_widget.offset:
+            elif crossroad_widget.geometry().contains(wire2.end - delta):
                 wire2.connected_crossroads.append(crossroad_widget)
                 crossroad_widget.connected_wires.append(wire2)
 
-        connect_distance = self.calc_distance(QPoint(width_wire // 2 + 1, 0), QPoint(0, width_wire // 2 + 1))
-        for wire_widget in self.connected_wires:
-            wire_widget.connected_wires.remove(self)
 
-            if self.calc_distance(self.start, wire_widget.start) == connect_distance \
-                    or self.calc_distance(self.start, wire_widget.end) == connect_distance:
-                wire_widget.connected_wires.append(wire1)
-                wire1.connected_wires.append(wire_widget)
-            elif self.calc_distance(self.end, wire_widget.start) == connect_distance \
-                    or self.calc_distance(self.end, wire_widget.end) == connect_distance:
-                wire_widget.connected_wires.append(wire2)
-                wire2.connected_wires.append(wire_widget)
+        if len(self.connected_crossroads) < 2:
+            connect_distance = self.calc_distance(QPoint(width_wire // 2 + 1, 0), QPoint(0, width_wire // 2 + 1))
+            for wire_widget in self.connected_wires:
+                wire_widget.connected_wires.remove(self)
+
+                if self.calc_distance(self.start, wire_widget.start) == connect_distance \
+                        or self.calc_distance(self.start, wire_widget.end) == connect_distance:
+                    wire_widget.connected_wires.append(wire1)
+                    wire1.connected_wires.append(wire_widget)
+                elif self.calc_distance(self.end, wire_widget.start) == connect_distance \
+                        or self.calc_distance(self.end, wire_widget.end) == connect_distance:
+                    wire_widget.connected_wires.append(wire2)
+                    wire2.connected_wires.append(wire_widget)
 
         wire1.show()
         wire2.show()
@@ -182,6 +189,11 @@ class WireWidget(QWidget):
         if self in self.parent().wire_widgets:
             self.parent().wire_widgets.pop(self)
         self.deleteLater()
+
+    def clear(self):
+        self.connected_wires.clear()
+        self.connected_pins.clear()
+        self.connected_crossroads.clear()
 
     def calc_distance(self, a: QPoint, b: QPoint):
         return ((a.x() - b.x())**2 + (a.y() - b.y())**2)**0.5
@@ -285,21 +297,23 @@ class WireWidget(QWidget):
                 last_pos_cursor_screen.y() - delta_y
             )
             new_pos = pos - QPoint(delta_x, delta_y) - self.offset
+            self.move_wire(new_pos)
 
-            if not self.connected_pins and not self.connected_crossroads:
-                if self.direction == Direction.vertical:
-                    self.start = QPoint(new_pos.x(), self.start.y())
-                    self.end = QPoint(new_pos.x(), self.end.y())
-                    self.move(new_pos.x(), self.y())
-                elif self.direction == Direction.horizontal:
-                    self.start = QPoint(self.start.x(), new_pos.y())
-                    self.end = QPoint(self.end.x(), new_pos.y())
-                    self.move(self.x(), new_pos.y())
+    def move_wire(self, new_pos):
+        if not self.connected_pins and not self.connected_crossroads:
+            if self.direction == Direction.vertical:
+                self.start = QPoint(new_pos.x(), self.start.y())
+                self.end = QPoint(new_pos.x(), self.end.y())
+                self.move(new_pos.x(), self.y())
+            elif self.direction == Direction.horizontal:
+                self.start = QPoint(self.start.x(), new_pos.y())
+                self.end = QPoint(self.end.x(), new_pos.y())
+                self.move(self.x(), new_pos.y())
 
-                point = self.pos() + self.offset
+            point = self.pos() + self.offset
 
-                for wire in self.connected_wires:
-                    wire.set_location(point=point)
+            for wire in self.connected_wires:
+                wire.set_location(point=point)
 
 
 
