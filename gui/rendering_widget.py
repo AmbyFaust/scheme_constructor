@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QWidget
 
 from core.schema_classes import Primitive, BaseGraphicsModel, Block
 from gui.block_widget import BlockWidget
+from gui.crossroad_widget import CrossroadWidget
 from gui.pin_widget import PinWidget
 from gui.primitive_widget import PrimitiveWidget
 from gui.wire_widget import Direction, WireWidget
@@ -22,6 +23,7 @@ class RenderingWidget(QWidget):
         self.block_widgets = {}
         self.pin_widgets = {}
         self.wire_widgets = {}
+        self.crossroad_widgets = {}
 
         self.rendered_wire = None
 
@@ -37,9 +39,7 @@ class RenderingWidget(QWidget):
         primitive_widget = PrimitiveWidget(self, primitive)
         primitive_widget.show()
         self.primitives_widgets[primitive_widget] = True
-
-    def del_primitive(self, primitive_widget: PrimitiveWidget):
-        primitive_widget.delete()
+        return primitive_widget
 
     def add_block(self, block: Block = None):
         if not block:
@@ -47,18 +47,14 @@ class RenderingWidget(QWidget):
         block_widget = BlockWidget(self, block)
         block_widget.show()
         self.block_widgets[block_widget] = True
-
-    def del_block(self, block_widget: BlockWidget):
-        block_widget.delete()
+        return block_widget
 
     def add_pin(self, connect_widget):
         pin_widget = PinWidget(self, connect_widget)
         connect_widget.pin_widgets.append(pin_widget)
         pin_widget.show()
         self.pin_widgets[pin_widget] = True
-
-    def del_pin(self, pin_widget):
-        pin_widget.delete()
+        return pin_widget
 
     def add_wire(self, start: QPoint, end: QPoint, direction: Direction,
                  connected_pins: list, connected_crossroads: list):
@@ -68,8 +64,11 @@ class RenderingWidget(QWidget):
         wire_widget.show()
         return wire_widget
 
-    def del_wire(self, wire_widget):
-        wire_widget.delete()
+    def add_crossroad(self, wires: list, pos: QPoint):
+        crossroad_widget = CrossroadWidget(self, wires, pos)
+        self.crossroad_widgets[crossroad_widget] = True
+        crossroad_widget.show()
+        return crossroad_widget
 
     def mousePressEvent(self, event):
         print('--------')
@@ -77,6 +76,7 @@ class RenderingWidget(QWidget):
         print('blocks:', len(self.block_widgets))
         print('pins:', len(self.pin_widgets))
         print('wires:', len(self.wire_widgets))
+        print('crossroads:', len(self.crossroad_widgets))
         if event.button() == Qt.LeftButton and self.rendered_wire:
             for pin_widget in self.pin_widgets:
                 if pin_widget.geometry().contains(event.pos()):

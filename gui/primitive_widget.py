@@ -73,9 +73,8 @@ class PrimitiveWidget(QWidget):
         self.setStyleSheet("border: 0px solid black; background-color: #cccccc;")
 
     def delete(self):
-        for pin_widget in self.pin_widgets:
-            pin_widget.delete()
-        self.pin_widgets.clear()
+        while self.pin_widgets:
+            self.pin_widgets[0].delete()
         self.parent().primitives_widgets.pop(self)
         self.deleteLater()
 

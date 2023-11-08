@@ -131,7 +131,6 @@ class WireWidget(QWidget):
                 wire2.connected_crossroads.append(crossroad_widget)
                 crossroad_widget.connected_wires.append(wire2)
 
-
         if len(self.connected_crossroads) < 2:
             connect_distance = self.calc_distance(QPoint(width_wire // 2 + 1, 0), QPoint(0, width_wire // 2 + 1))
             for wire_widget in self.connected_wires:
@@ -149,19 +148,17 @@ class WireWidget(QWidget):
         wire1.show()
         wire2.show()
 
-        crossroad_widget = CrossroadWidget(
-            self.parent(),
+        crossroad_widget = self.parent().add_crossroad(
             [wire1, wire2],
             QPoint(
                 self.start.x() + self.width() // 2 + 1,
                 self.start.y() + self.height() // 2 + 1
             )
         )
+
         crossroad_widget.move(crossroad_widget.pos() - crossroad_widget.offset)
         wire1.connected_crossroads.append(crossroad_widget)
         wire2.connected_crossroads.append(crossroad_widget)
-
-        crossroad_widget.show()
 
         self.connected_wires.clear()
         self.connected_crossroads.clear()

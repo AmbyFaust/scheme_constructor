@@ -146,6 +146,8 @@ class CrossroadWidget(QWidget):
         wire2.delete()
 
         self.connected_wires.clear()
+        if self in self.parent().crossroad_widgets:
+            self.parent().crossroad_widgets.pop(self)
         self.deleteLater()
 
     def cascade_delete(self):
@@ -166,6 +168,8 @@ class CrossroadWidget(QWidget):
             return
 
         self.connected_wires.clear()
+        if self in self.parent().crossroad_widgets:
+            self.parent().crossroad_widgets.pop(self)
         self.deleteLater()
 
     def connect_wire(self, event):
@@ -183,6 +187,7 @@ class CrossroadWidget(QWidget):
                 or (wire.direction == Direction.vertical and count_vertical_wires < 2):
             self.connected_wires.append(wire)
             wire.move_wire(self.pos() + self.offset - wire.offset)
+            wire.set_location(self.pos() + self.offset)
             wire.connected_crossroads.append(self)
             self.parent().rendered_wire = None
 
@@ -208,8 +213,8 @@ class CrossroadWidget(QWidget):
 
         if self.dragging:
             x_possible = (
-                min(self.connected_wires[0].start.x(), self.connected_wires[1].start.x()) + width_wire // 2 + 1,
-                max(self.connected_wires[0].end.x(), self.connected_wires[1].end.x()) + width_wire // 2 + 1
+                min(self.connected_wires[0].start.x(), self.connected_wires[1].start.x()),
+                max(self.connected_wires[0].end.x(), self.connected_wires[1].end.x())
             )
             y_possible = (
                 min(self.connected_wires[0].start.y(), self.connected_wires[1].start.y()),
