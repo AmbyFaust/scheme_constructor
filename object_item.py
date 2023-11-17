@@ -29,7 +29,7 @@ class ObjectItem(QListWidgetItem):
 # создаёт начальный примитив, добавляемый в список при инициализации
 def createNewPrimitiveObjectItem():
         new_primitive = Primitive("new", [], 0, 0, 100, 50)
-        new_primitive_widget = PrimitiveWidget(None, controller=None, primitive=new_primitive)
+        new_primitive_widget = PrimitiveWidget(None, primitive=new_primitive)
         return ObjectItem("", new_primitive_widget)
 
 
@@ -45,10 +45,10 @@ class _ObjectDublicator:
     def clone(obj):
         cloned = None
         if isinstance(obj, PrimitiveWidget):
-            cloned = PrimitiveWidget(None, deepcopy(obj.primitive), obj.controller)
+            cloned = PrimitiveWidget(None, deepcopy(obj.primitive))
 
         elif isinstance(obj, BlockWidget):
-            cloned = BlockWidget(None, deepcopy(obj.block), obj.controller)
+            cloned = BlockWidget(None, deepcopy(obj.block))
 
         if not cloned:
             return cloned
