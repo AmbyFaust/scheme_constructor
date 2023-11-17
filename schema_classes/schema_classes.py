@@ -1,124 +1,463 @@
-# ------------------------------- Класс соединения пинов ---------------------------------------
-class PinConnection:
-    def __init__(self, name: str, pin_1: str, pin_2: str):
-        self.__name = name
-        self.__pin_1 = pin_1
-        self.__pin_2 = pin_2
-
-    def get_name(self) -> str:
-        return self.__name
-
-    def set_name(self, name: str):
-        self.__name = name
-
-    def get_pin_1(self) -> str:
-        return self.__pin_1
-
-    def set_pin_1(self, pin_1: str):
-        self.__pin_1 = pin_1
-
-    def get_pin_2(self) -> str:
-        return self.__pin_2
-
-    def set_pin_2(self, pin_2: str):
-        self.__pin_2 = pin_2
+from typing import List, Tuple
 
 
-# ------------------------------- Класс, отвечающий за графическое представление -------------------------------
 class BaseGraphicsModel:
-    def __init__(self, top: int, left: int, width: int, height: int):
-        self.__top = top
-        self.__left = left
-        self.__width = width
-        self.__height = height
+    """
+    Базовый класс для графических моделей. Этот класс предоставляет базовые атрибуты и методы для работы с графическими объектами.
+    """
+    def __init__(self, top_left: Tuple[int, int], width: int = 0, height: int = 0):
+        """
+        Инициализирует объект BaseGraphicsModel.
 
-    def get_top(self) -> int:
-        return self.__top
+        Args:
+            top_left (Tuple[int, int]): Координаты верхнего левого угла объекта.
+            width (int, optional): Ширина объекта. Defaults to 0.
+            height (int, optional): Высота объекта. Defaults to 0.
+        """
+        self._top_left = top_left
+        self._width = width
+        self._height = height
 
-    def set_top(self, top: int):
-        self.__top = top
+    def get_top_left(self) -> Tuple[int, int]:
+        """
+        Возвращает координаты верхнего левого угла объекта.
 
-    def get_left(self) -> int:
-        return self.__left
+        Returns:
+            Tuple[int, int]: Координаты верхнего левого угла.
+        """
+        return self._top_left
 
-    def set_left(self, left: int):
-        self.__left = left
+    def set_top_left(self, top_left: Tuple[int, int]):
+        """
+        Устанавливает новые координаты верхнего левого угла объекта.
+
+        Args:
+            top_left (Tuple[int, int]): Новые координаты верхнего левого угла.
+        """
+        self._top_left = top_left
 
     def get_width(self) -> int:
-        return self.__width
+        """
+        Возвращает ширину объекта.
+
+        Returns:
+            int: Ширина объекта.
+        """
+        return self._width
 
     def set_width(self, width: int):
-        self.__width = width
+        """
+        Устанавливает новую ширину объекта.
+
+        Args:
+            width (int): Новая ширина объекта.
+        """
+        self._width = width
 
     def get_height(self) -> int:
-        return self.__height
+        """
+        Возвращает высоту объекта.
+
+        Returns:
+            int: Высота объекта.
+        """
+        return self._height
 
     def set_height(self, height: int):
-        self.__height = height
+        """
+        Устанавливает новую высоту объекта.
+
+        Args:
+            height (int): Новая высота объекта.
+        """
+        self._height = height
 
 
-# ---------------------------------------- Класс примитива ----------------------------------------
+class Pin(BaseGraphicsModel):
+    """
+    Класс, представляющий пин. Этот класс наследует атрибуты и методы от BaseGraphicsModel.
+    """
+    def __init__(self, name: str, top_left: Tuple[int, int]):
+        """
+        Инициализирует объект Pin.
+
+        Args:
+            name (str): Имя пина.
+            top_left (Tuple[int, int]): Координаты верхнего левого угла пина.
+        """
+        super().__init__(top_left)
+        self._name = name
+
+    def get_name(self) -> str:
+        """
+        Возвращает имя пина.
+
+        Returns:
+            str: Имя пина.
+        """
+        return self._name
+
+    def set_name(self, name: str):
+        """
+        Устанавливает новое имя пина.
+
+        Args:
+            name (str): Новое имя пина.
+        """
+        self._name = name
+
+
+class PinNet:
+    """
+    Класс, представляющий соединение пинов.
+    """
+    def __init__(self, name: str, pins: List[Pin], lines: List[List[Tuple[int, int]]]):
+        """
+        Инициализирует объект PinNet.
+
+        Args:
+            name (str): Имя соединения пинов.
+            pins (List[Pin]): Список пинов, входящих в соединение.
+            lines (List[List[Tuple[int, int]]]): Список линий, представляющих соединение.
+        """
+        self._name = name
+        self._pins = pins
+        self._lines = lines
+
+    def get_name(self) -> str:
+        """
+        Возвращает имя соединения пинов.
+
+        Returns:
+            str: Имя соединения пинов.
+        """
+        return self._name
+
+    def set_name(self, name: str):
+        """
+        Устанавливает новое имя соединения пинов.
+
+        Args:
+            name (str): Новое имя соединения пинов.
+        """
+        self._name = name
+
+    def get_pins(self) -> List[Pin]:
+        """
+        Возвращает список пинов, входящих в соединение.
+
+        Returns:
+            List[Pin]: Список пинов.
+        """
+        return self._pins
+
+    def set_pins(self, pins: List[Pin]):
+        """
+        Устанавливает новый список пинов, входящих в соединение.
+
+        Args:
+            pins (List[Pin]): Новый список пинов.
+        """
+        self._pins = pins
+
+    def get_lines(self) -> List[List[Tuple[int, int]]]:
+        """
+        Возвращает список линий, представляющих соединение пинов.
+
+        Returns:
+            List[List[Tuple[int, int]]]: Список линий.
+        """
+        return self._lines
+
+    def set_lines(self, lines: List[List[Tuple[int, int]]]):
+        """
+        Устанавливает новый список линий, представляющих соединение пинов.
+
+        Args:
+            lines (List[List[Tuple[int, int]]]): Новый список линий.
+        """
+        self._lines = lines
+
+
 class Primitive(BaseGraphicsModel):
-    def __init__(self, name: str, pins: [str], top: int, left: int, width: int, height: int):
-        super().__init__(top, left, width, height)
-        self.__name = name
-        self.__pins = pins
+    """
+    Класс, представляющий примитив. Этот класс также наследует атрибуты и методы от BaseGraphicsModel.
+    """
+    def __init__(self, name: str, pins: List[Pin], top_left: Tuple[int, int], width: int, height: int, link: str = ''):
+        """
+        Инициализирует объект Primitive.
+
+        Args:
+            name (str): Имя примитива.
+            pins (List[Pin]): Список пинов, входящих в примитив.
+            top_left (Tuple[int, int]): Координаты верхнего левого угла примитива.
+            width (int): Ширина примитива.
+            height (int): Высота примитива.
+            link (str, optional): Ссылка на примитив. Defaults to ''.
+        """
+        super().__init__(top_left, width, height)
+        self._name = name
+        self._pins = pins
+        self._link = link
 
     def get_name(self) -> str:
-        return self.__name
+        """
+        Возвращает имя примитива.
+
+        Returns:
+            str: Имя примитива.
+        """
+        return self._name
 
     def set_name(self, name: str):
-        self.__name = name
+        """
+        Устанавливает новое имя примитива.
 
-    def get_pins(self) -> [str]:
-        return self.__pins
+        Args:
+            name (str): Новое имя примитива.
+        """
+        self._name = name
 
-    def set_pins(self, pins: [str]):
-        self.__pins = pins
+    def get_pins(self) -> List[Pin]:
+        """
+        Возвращает список пинов, входящих в примитив.
+
+        Returns:
+            List[Pin]: Список пинов.
+        """
+        return self._pins
+
+    def set_pins(self, pins: List[Pin]):
+        """
+        Устанавливает новый список пинов, входящих в примитив.
+
+        Args:
+            pins (List[Pin]): Новый список пинов.
+        """
+        self._pins = pins
+
+    def get_link(self) -> str:
+        """
+        Возвращает ссылку на примитив.
+
+        Returns:
+            str: Ссылка на примитив.
+        """
+        return self._link
+
+    def set_link(self, link: str):
+        """
+        Устанавливает новую ссылку на примитив.
+
+        Args:
+            link (str): Новая ссылка на примитив.
+        """
+        self._link = link
 
 
-# ----------------- Класс блока (в том числе класс основной схемы - блок с именем "main") -----------------
+class Object(BaseGraphicsModel):
+    """
+    Класс, представляющий объект схемы. Этот класс также наследует атрибуты и методы от BaseGraphicsModel.
+    """
+    def __init__(self, name: str, object_type: str, link: str, top_left: Tuple[int, int], width: int, height: int):
+        """
+        Инициализирует объект Object.
+
+        Args:
+            name (str): Имя объекта схемы.
+            object_type (str): Тип объекта (например, "primitive" или "block").
+            link (str): Ссылка на объект.
+            top_left (Tuple[int, int]): Координаты верхнего левого угла объекта.
+            width (int): Ширина объекта.
+            height (int): Высота объекта.
+        """
+        super().__init__(top_left, width, height)
+        self._name = name
+        self._object_type = object_type
+        self._link = link
+
+    def get_name(self) -> str:
+        """
+        Возвращает имя объекта схемы.
+
+        Returns:
+            str: Имя объекта схемы.
+        """
+        return self._name
+
+    def set_name(self, name: str):
+        """
+        Устанавливает новое имя объекта схемы.
+
+        Args:
+            name (str): Новое имя объекта схемы.
+        """
+        self._name = name
+
+    def get_object_type(self) -> str:
+        """
+        Возвращает тип объекта схемы.
+
+        Returns:
+            str: Тип объекта (например, "primitive" или "block").
+        """
+        return self._object_type
+
+    def set_object_type(self, object_type: str):
+        """
+        Устанавливает новый тип объекта схемы.
+
+        Args:
+            object_type (str): Новый тип объекта (например, "primitive" или "block").
+        """
+        self._object_type = object_type
+
+    def get_link(self) -> str:
+        """
+        Возвращает ссылку на объект.
+
+        Returns:
+            str: Ссылка на объект.
+        """
+        return self._link
+
+    def set_link(self, link: str):
+        """
+        Устанавливает новую ссылку на объект.
+
+        Args:
+            link (str): Новая ссылка на объект.
+        """
+        self._link = link
+
+
 class Block(BaseGraphicsModel):
-    def __init__(self, name: str, pins: [str], pin_connection: [PinConnection],
-                 top: int, left: int, width: int, height: int):
-        super().__init__(top, left, width, height)
-        self.__name = name
-        self.__pins = pins
-        self.__pin_connection = pin_connection
-        self.__inner_blocks_list = []    # здесь будет храниться лист с внутренними блоками и примитивами
-        self.__inner_connections_list = []  # здесь будет храниться лист со связями блока
-        self.__init_inner_blocks_and_connections()
+    """
+    Класс, представляющий блок-схемы. Этот класс также наследует атрибуты и методы от BaseGraphicsModel.
+    """
+    def __init__(self, name: str, pins: List[Pin], objects: List[Object], pin_nets: List[PinNet],
+                 top_left: Tuple[int, int], width: int, height: int, link: str = ''):
+        """
+        Инициализирует блок-схемы.
 
-    # функция (сейчас заглушка) для инициализации внутренних блоков и связей
-    def __init_inner_blocks_and_connections(self):
-        pass
+        Args:
+            name (str): Имя блок-схемы.
+            pins (List[Pin]): Список пинов, принадлежащих блок-схеме.
+            objects (List[Object]): Список объектов, входящих в состав блок-схемы.
+            pin_nets (List[PinNet]): Список соединений пинов.
+            top_left (Tuple[int, int]): Координаты верхнего левого угла блок-схемы.
+            width (int): Ширина блок-схемы.
+            height (int): Высота блок-схемы.
+            link (str): Ссылка на блок-схему (по умолчанию пустая строка).
+        """
+        super().__init__(top_left, width, height)
+        self._name = name
+        self._pins = pins
+        self._objects = objects
+        self._pin_nets = pin_nets
+        self._link = link
+
+        self._inner_objects = self._init_inner_blocks_and_connections()
+
+    def _init_inner_blocks_and_connections(self) -> List[BaseGraphicsModel]:
+        """
+        Инициализирует внутренние блоки и соединения, принадлежащие этой блок-схеме.
+
+        Returns:
+            List[BaseGraphicsModel]: Список внутренних блоков и соединений.
+        """
+        inner_objects = []
+        for obj in self._objects:
+            name = obj.get_name()
+            link = obj.get_link()
+            object_type = obj.get_object_type()
+            if object_type == 'primitive':
+                new_object = Primitive(name, [], obj.get_top_left(),
+                                       obj.get_width(), obj.get_height(), link)
+            else:
+                new_object = Block(name, [], [], [],
+                                   obj.get_top_left(), obj.get_width(), obj.get_height(), link)
+
+            inner_objects.append(new_object)
+        return inner_objects
 
     def get_name(self) -> str:
-        return self.__name
+        """
+        Возвращает имя блок-схемы.
+
+        Returns:
+            str: Имя блок-схемы.
+        """
+        return self._name
 
     def set_name(self, name: str):
-        self.__name = name
+        """
+        Устанавливает новое имя блок-схемы.
 
-    def get_pins(self) -> [str]:
-        return self.__pins
+        Args:
+            name (str): Новое имя блок-схемы.
+        """
+        self._name = name
 
-    def set_pins(self, pins: [str]):
-        self.__pins = pins
+    def get_pins(self) -> List[Pin]:
+        """
+        Возвращает список пинов, принадлежащих блок-схеме.
 
-    def get_pin_connection(self) -> [PinConnection]:
-        return self.__pin_connection
+        Returns:
+            List[Pin]: Список пинов.
+        """
+        return self._pins
 
-    def set_pin_connection(self, pin_connection: [PinConnection]):
-        self.__pin_connection = pin_connection
+    def set_pins(self, pins: List[Pin]):
+        """
+        Устанавливает новый список пинов, принадлежащих блок-схеме.
 
-    def get_inner_connections_list(self) -> list:
-        return self.__inner_connections_list
+        Args:
+            pins (List[Pin]): Новый список пинов.
+        """
+        self._pins = pins
 
-    def set_inner_connections_list(self, inner_connections_list: list):
-        self.__inner_connections_list = inner_connections_list
+    def get_objects(self) -> List[Object]:
+        """
+        Возвращает список объектов, входящих в состав блок-схемы.
 
-    def get_inner_blocks_list(self) -> list:
-        return self.__inner_blocks_list
+        Returns:
+            List[Object]: Список объектов.
+        """
+        return self._objects
 
-    def set_inner_block_list(self, inner_blocks_list: list):
-        self.__inner_blocks_list = inner_blocks_list
+    def set_objects(self, objects: List[Object]):
+        """
+        Устанавливает новый список объектов, входящих в состав блок-схемы.
+
+        Args:
+            objects (List[Object]): Новый список объектов.
+        """
+        self._objects = objects
+
+    def get_pin_nets(self) -> List[PinNet]:
+        """
+        Возвращает список соединений пинов.
+
+        Returns:
+            List[PinNet]: Список соединений пинов.
+        """
+        return self._pin_nets
+
+    def set_pin_nets(self, pin_nets: List[PinNet]):
+        """
+        Устанавливает новый список соединений пинов.
+
+        Args:
+            pin_nets (List[PinNet]): Новый список соединений пинов.
+        """
+        self._pin_nets = pin_nets
+
+    def get_inner_objects(self) -> List[BaseGraphicsModel]:
+        """
+        Возвращает список внутренних блоков и соединений, принадлежащих этой блок-схеме.
+
+        Returns:
+            List[BaseGraphicsModel]: Список внутренних блоков и соединений.
+        """
+        return self._inner_objects
