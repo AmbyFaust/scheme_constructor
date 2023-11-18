@@ -1,11 +1,14 @@
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtCore import QRect, QSize, QPoint
-
 from PyQt5.QtWidgets import QListWidgetItem, QWidget
 from PyQt5.QtGui import QIcon
-from gui.rendering_widget import Primitive, PrimitiveWidget, Block, BlockWidget, PinWidget
-from settings import pin_width, pin_height
 
+from gui.pin_widget import PinWidget
+from gui.primitive_widget import PrimitiveWidget
+from gui.block_widget import BlockWidget
+from core.schema_classes import Primitive, Block
+from settings import pin_width, pin_height, primitive_width, primitive_height
+                                            
 from copy import deepcopy
 
 
@@ -28,7 +31,7 @@ class ObjectItem(QListWidgetItem):
 
 # создаёт начальный примитив, добавляемый в список при инициализации
 def createNewPrimitiveObjectItem():
-        new_primitive = Primitive("new", [], 0, 0, 100, 50)
+        new_primitive = Primitive("new", [], (0, 0), primitive_width, primitive_height)
         new_primitive_widget = PrimitiveWidget(None, primitive=new_primitive)
         return ObjectItem("", new_primitive_widget)
 
