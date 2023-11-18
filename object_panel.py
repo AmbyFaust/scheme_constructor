@@ -1,10 +1,8 @@
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtCore import pyqtSignal
-
 from PyQt5.QtWidgets import QListWidget, QWidget, QAction, QMenu
-from gui.rendering_widget import PrimitiveWidget, BlockWidget
 
-from gui.object_item import ObjectItem, createNewPrimitiveObjectItem
+from gui.object_item import ObjectItem, PrimitiveWidget, BlockWidget, createNewPrimitiveObjectItem
 
 
 class ObjectPanel(QListWidget):
@@ -88,9 +86,9 @@ class ObjectPanel(QListWidget):
             if item.whatsThis() == "" and item.getStoredObject.name_label.text() == obj.name_label.text():
                 item.setStoredObject(obj)
                 return
-        if isinstance(obj, Block):
+        if isinstance(obj, BlockWidget):
             self.addItem(new_el)
-        elif isinstance(obj, Primitive):
+        elif isinstance(obj, PrimitiveWidget):
             ind = self.indexFromItem(self.__block_label_item).row()
             self.insertItem(ind+1, new_el)
 
