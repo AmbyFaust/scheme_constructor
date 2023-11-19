@@ -10,7 +10,7 @@ class ObjectPanelModuleTest(unittest.TestCase):
 
 ### ObjectItem
 ####### testing cloning 
-    def testPrimitiveCloning(self):
+    def test_primitive_cloning(self):
         primitive = Primitive("", [], (0,0), 1, 1)
         primitive_widget = PrimitiveWidget(None, primitive=primitive)
         cloned = _ObjectDublicator.clone(primitive_widget)
@@ -18,7 +18,7 @@ class ObjectPanelModuleTest(unittest.TestCase):
         self.assertIsNot(cloned, primitive_widget)
 
 
-    def testBlockCloning(self):
+    def test_block_cloning(self):
         block = Block("", [], [], [], (0,0), 1, 1)
         block_widget = BlockWidget(None, block=block)
         cloned = _ObjectDublicator.clone(block_widget)
@@ -26,14 +26,14 @@ class ObjectPanelModuleTest(unittest.TestCase):
         self.assertIsNot(cloned, block_widget)
 
 
-    def testOtherCloning(self):
+    def test_other_cloning(self):
         block = Block("", [], [], [], (0,0), 1, 1)
         self.assertIsNone(_ObjectDublicator.clone(block))
 #######
 
 ### ObjectPanel
 ####### testing registration
-    def testPrimitiveRegistration(self):
+    def test_primitive_registration(self):
         object_panel = ObjectPanel()
         count = object_panel.count()
 
@@ -46,7 +46,7 @@ class ObjectPanelModuleTest(unittest.TestCase):
         self.assertEqual(stored_primitive.name_label.text(), "test")
 
 
-    def testBlockRegistration(self):
+    def test_block_registration(self):
         object_panel = ObjectPanel()
         count = object_panel.count()
 
@@ -59,7 +59,7 @@ class ObjectPanelModuleTest(unittest.TestCase):
         self.assertEqual(stored_block.name_label.text(), "test")
 
 
-    def testEditingObject(self): # aka register primitve/block with same name 
+    def test_editing_object(self): # aka register primitve/block with same name 
         object_panel = ObjectPanel()
         block = Block("test", [], [], [], (0,0), 1, 1)
         block_widget = BlockWidget(None, block=block)
@@ -79,5 +79,4 @@ class ObjectPanelModuleTest(unittest.TestCase):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    #sys.exit(app.exec_())
     unittest.main()
