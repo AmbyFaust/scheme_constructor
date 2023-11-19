@@ -2,7 +2,7 @@ from PyQt5.QtCore import Qt, QPoint
 from PyQt5.QtGui import QCursor, QMouseEvent
 from PyQt5.QtWidgets import QWidget, QAction, QMenu, QLabel, QVBoxLayout, QDialog
 
-from core.schema_classes import Block
+from schema_classes.schema_classes import Block
 from gui.pin_widget import PinWidget
 from gui.set_name_dialog import SetNameDialog
 from settings import rendering_widget_width, rendering_widget_height
@@ -13,7 +13,7 @@ class BlockWidget(QWidget):
         super(BlockWidget, self).__init__(parent)
         self.setAttribute(Qt.WA_StyledBackground, True)
         self.block = block
-        self.move(block.get_left(), block.get_top())
+        self.move(*block.get_top_left()[::-1])
         self.setFixedWidth(block.get_width())
         self.setFixedHeight(block.get_height())
 

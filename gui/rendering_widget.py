@@ -2,7 +2,7 @@ from PyQt5.QtCore import Qt, QPoint
 from PyQt5.QtGui import QCursor, QMouseEvent
 from PyQt5.QtWidgets import QWidget
 
-from core.schema_classes import Primitive, BaseGraphicsModel, Block
+from schema_classes.schema_classes import Primitive, Block
 from gui.block_widget import BlockWidget
 from gui.crossroad_widget import CrossroadWidget
 from gui.pin_widget import PinWidget
@@ -27,15 +27,11 @@ class RenderingWidget(QWidget):
 
         self.rendered_wire = None
 
-        self.__create_widgets()
         self.setMouseTracking(True)
-
-    def __create_widgets(self):
-        pass
 
     def add_primitive(self, primitive: Primitive = None):
         if not primitive:
-            primitive = Primitive('primitive', [], 50, 100, 100, 50)
+            primitive = Primitive('primitive', [], (50, 100), 100, 50)
         primitive_widget = PrimitiveWidget(self, primitive)
         primitive_widget.show()
         self.primitives_widgets[primitive_widget] = True
@@ -43,7 +39,7 @@ class RenderingWidget(QWidget):
 
     def add_block(self, block: Block = None):
         if not block:
-            block = Block('block', [], [], 100, 100, block_width, block_height)
+            block = Block('block', [], [], [], (100, 100), block_width, block_height)
         block_widget = BlockWidget(self, block)
         block_widget.show()
         self.block_widgets[block_widget] = True

@@ -3,7 +3,7 @@ from PyQt5.QtCore import QPoint, Qt
 from PyQt5.QtGui import QCursor, QMouseEvent
 from PyQt5.QtWidgets import QWidget, QMenu, QAction, QVBoxLayout, QLabel, QDialog
 
-from core.schema_classes import Primitive
+from schema_classes.schema_classes import Primitive
 from gui.pin_widget import PinWidget
 from gui.set_name_dialog import SetNameDialog
 from settings import primitive_width, primitive_height, rendering_widget_width, rendering_widget_height
@@ -14,7 +14,7 @@ class PrimitiveWidget(QWidget):
         super(PrimitiveWidget, self).__init__(parent)
         self.setAttribute(Qt.WA_StyledBackground, True)
         self.primitive = primitive
-        self.move(primitive.get_left(), primitive.get_top())
+        self.move(*primitive.get_top_left()[::-1])
         self.setFixedWidth(primitive.get_width())
         self.setFixedHeight(primitive.get_height())
 

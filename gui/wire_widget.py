@@ -174,8 +174,12 @@ class WireWidget(QWidget):
             self.connected_pins.clear()
 
         for wire in self.connected_wires:
-            wire.connected_wires.remove(self)
-            wire.delete()
+            try:
+                wire.connected_wires.remove(self)
+                wire.delete()
+            except Exception:
+                pass
+
         self.connected_wires.clear()
 
         for crossroads_widget in self.connected_crossroads:
