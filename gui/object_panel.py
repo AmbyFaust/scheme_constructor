@@ -90,5 +90,5 @@ class ObjectPanel(QListWidget):
             self.addItem(new_el)
         elif isinstance(obj, PrimitiveWidget):
             ind = self.indexFromItem(self.__block_label_item).row()
-            self.insertItem(ind+1, new_el)
+            self.insertItem(ind, new_el)
 
