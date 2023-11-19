@@ -12,10 +12,3 @@ def dict_to_json(d, filename='out.json'):
 
     with open(filename, mode='w') as f:
         json.dump(d, f)
-
-
-def get_or_re(d, key):
-    if key not in d.keys():
-        raise RuntimeError(f'Key {key} not found in dictionary.')
-    return d[key]
-

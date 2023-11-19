@@ -1,18 +1,25 @@
 from schema_classes import Pin, PinNet, Primitive, Block, Object
-from utils import json_to_dict, get_or_re
+from utils import json_to_dict
 from typing import List, Tuple
 
 
 def parse(filename):
     data = json_to_dict(filename)
 
+    main_found = False
     items = []
 
-    for el in data:
-        if parse_type(el) == 'block':
-            items.append(parse_block(el))
-        elif parse_type(el) == 'primitive':
-            items.append(parse_primitive(el))
+    try:
+        for el in data:
+            if parse_type(el) == 'block':
+                items.append(parse_block(el))
+                main_found = main_found or (parse_name(el) == 'main')
+            elif parse_type(el) == 'primitive':
+                items.append(parse_primitive(el))
+        if not main_found:
+            raise RuntimeError('Block with name \"main\" not found.')
+    except KeyError as ke:
+        raise KeyError(f'Key {ke} was expected but not found.')
 
     return items
 
@@ -51,7 +58,7 @@ def parse_object(object_dict) -> Object:
 
 
 def parse_objects(objects_dict) -> List[Object]:
-    return [parse_object(object_dict) for object_dict in get_or_re(objects_dict, 'objects')]
+    return [parse_object(object_dict) for object_dict in objects_dict['objects']]
 
 
 def parse_pin(pin_dict) -> Pin:
@@ -59,7 +66,7 @@ def parse_pin(pin_dict) -> Pin:
 
 
 def parse_pins(pins_dict) -> List[Pin]:
-    return [parse_pin(pin_dict) for pin_dict in get_or_re(pins_dict, 'pins')]
+    return [parse_pin(pin_dict) for pin_dict in pins_dict['pins']]
 
 
 def parse_pin_net(pin_net_dict) -> PinNet:
@@ -67,36 +74,36 @@ def parse_pin_net(pin_net_dict) -> PinNet:
 
 
 def parse_pin_nets(pin_nets_dict) -> List[PinNet]:
-    return [parse_pin_net(pin_net_dict) for pin_net_dict in get_or_re(pin_nets_dict, 'pin_nets')]
+    return [parse_pin_net(pin_net_dict) for pin_net_dict in pin_nets_dict['pin_nets']]
 
 
 def parse_top_left(top_left_dict) -> tuple:
-    return tuple([get_or_re(top_left_dict, 'top'), get_or_re(top_left_dict, 'left')])
+    return tuple([top_left_dict['top'], top_left_dict['left']])
 
 
 def parse_name(name_dict) -> str:
-    return get_or_re(name_dict, 'name')
+    return name_dict['name']
 
 
 def parse_width(width_dict) -> int:
-    return get_or_re(width_dict, 'width')
+    return width_dict['width']
 
 
 def parse_height(height_dict) -> int:
-    return get_or_re(height_dict, 'height')
+    return height_dict['height']
 
 
 def parse_link(link_dict) -> str:
-    return get_or_re(link_dict, 'link')
+    return link_dict['link']
 
 
 def parse_type(type_dict) -> str:
-    return get_or_re(type_dict, 'type')
+    return type_dict['type']
 
 
 def parse_lines(lines_dict) -> List[List[Tuple[int, int]]]:
     return [
-        [tuple(get_or_re(get_or_re(get_or_re(lines_dict, 'lines'), i), 0)),
-         tuple(get_or_re(get_or_re(get_or_re(lines_dict, 'lines'), i), 1))]
-        for i in range(len(get_or_re(lines_dict, 'lines')))
+        [tuple(lines_dict['lines'][i][0]),
+         tuple(lines_dict['lines'][i][0])]
+        for i in range(len(lines_dict['lines']))
     ]
