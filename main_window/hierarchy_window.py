@@ -1,20 +1,8 @@
 from PyQt5.QtWidgets import QMenu, QMainWindow, QMenuBar, QWidget
 from PyQt5.QtWidgets import QTreeView, QVBoxLayout
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
-from PyQt5 import QtCore
-from PyQt5 import QtWidgets
-from collections import deque
-from pathlib import Path
 
 
-# class StandartItem(QStandardItem):
-#     def __init__(self, name, type):
-#         super().__init__()
-#         self.name = name
-#         self.type = type
-#
-#         self.setEditable(False)
-#         self.setText([name, type])
 
 class HierarchyWindow(QMainWindow):
     """
@@ -37,8 +25,7 @@ class HierarchyWindow(QMainWindow):
 
         self.setCentralWidget(self.tree)
 
-        # self.menuBar = None
-        # self.__createMenuBar()
+
 
     def get_hierarchy(self, primitives, blocks):
         """
@@ -66,17 +53,15 @@ class HierarchyWindow(QMainWindow):
             root = self.model.invisibleRootItem()
 
         for prim in self.primitives_arr:
-            name, typ = self.dfs(prim)
-            #name = QStandardItem(prim.primitive.get_name())
-            #typ = QStandardItem(type(prim.primitive).__name__)
+            name, typ = self.__dfs(prim)
             root.appendRow([name, typ])
 
         for block in self.blocks_arr:
-            name, typ = self.dfs(block)
+            name, typ = self.__dfs(block)
 
             root.appendRow([name, typ])
 
-    def dfs(self, base_obj):
+    def __dfs(self, base_obj):
         if type(base_obj).__name__ == "PrimitiveWidget":
             name = QStandardItem(base_obj.primitive.get_name())
             typ = QStandardItem(type(base_obj.primitive).__name__)
@@ -95,26 +80,5 @@ class HierarchyWindow(QMainWindow):
                 return name, typ
 
 
-
-
-
-    # def __createMenuBar(self):
-    #     """
-    #     creating menu bar for working with files and hierarchy window
-    #     :return:
-    #     """
-    #     self.menuBar = QMenuBar(self)
-    #     self.setMenuBar(self.menuBar)
-    #     self.menuBar.addAction('reload', self.clicked_reload_hierarchy)
-    #
-    #
-    # @QtCore.pyqtSlot()
-    # def clicked_reload_hierarchy(self):
-    #     """
-    #     reload hierarchy after update
-    #     :return:
-    #     """
-    #     action = self.sender()
-    #     print("Pressed button", action.text())
 
 

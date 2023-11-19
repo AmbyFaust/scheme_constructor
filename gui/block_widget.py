@@ -4,16 +4,14 @@ from PyQt5.QtWidgets import QWidget, QAction, QMenu, QLabel, QVBoxLayout, QDialo
 
 from core.schema_classes import Block
 from gui.pin_widget import PinWidget
-from gui.rendering_controller import RenderingController
 from gui.set_name_dialog import SetNameDialog
 from settings import rendering_widget_width, rendering_widget_height
 
 
 class BlockWidget(QWidget):
-    def __init__(self, parent=None, controller: RenderingController = None, block: Block = None):
+    def __init__(self, parent, block: Block):
         super(BlockWidget, self).__init__(parent)
         self.setAttribute(Qt.WA_StyledBackground, True)
-        self.controller = controller
         self.block = block
         self.move(block.get_left(), block.get_top())
         self.setFixedWidth(block.get_width())
@@ -35,10 +33,7 @@ class BlockWidget(QWidget):
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.show_context_menu)
 
-    def destructor(self):
-        for pin_widget in self.pin_widgets:
-            pin_widget.destructor()
-        self.pin_widgets.clear()
+        self.setMouseTracking(True)
 
     def __create_widgets(self):
         self.name_label = QLabel(self.block.get_name())
@@ -64,7 +59,8 @@ class BlockWidget(QWidget):
         context_menu.addAction(self.add_pin_action)
         context_menu.addAction(self.set_name_action)
         context_menu.addAction(self.del_action)
-        context_menu.exec(self.mapToGlobal(position))
+        if not self.parent().rendered_wire:
+            context_menu.exec(self.mapToGlobal(position))
 
     def lock(self):
         self.setStyleSheet("border: 2px solid black; background-color: #42aaff;")
@@ -76,12 +72,13 @@ class BlockWidget(QWidget):
         self.setStyleSheet("border: 0px solid black; background-color: #42aaff;")
 
     def delete(self):
-        self.parent().del_block(self)
+        while self.pin_widgets:
+            self.pin_widgets[0].delete()
+        self.parent().block_widgets.pop(self)
+        self.deleteLater()
 
     def add_pin(self):
-        pin_widget = PinWidget(self.parent(), self)
-        self.pin_widgets.append(pin_widget)
-        pin_widget.show()
+        self.parent().add_pin(self)
 
     def set_name(self):
         set_name_dialog = SetNameDialog(self.name_label.text())
