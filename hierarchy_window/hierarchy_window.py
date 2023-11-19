@@ -3,7 +3,6 @@ from PyQt5.QtWidgets import QTreeView, QVBoxLayout
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 
 
-
 class HierarchyWindow(QMainWindow):
     """
     Window for present hierarchy of primitives and blocks
@@ -17,6 +16,7 @@ class HierarchyWindow(QMainWindow):
         self.blocks_arr = []
 
         self.tree = QTreeView(self)
+        self.tree.setHeaderHidden(True)
         self.model = QStandardItemModel()
         self.model.setHorizontalHeaderLabels(['Name', 'Type'])
         self.tree.header().setDefaultSectionSize(180)
@@ -24,8 +24,6 @@ class HierarchyWindow(QMainWindow):
         self.tree.expandAll()
 
         self.setCentralWidget(self.tree)
-
-
 
     def get_hierarchy(self, primitives, blocks):
         """
@@ -35,11 +33,6 @@ class HierarchyWindow(QMainWindow):
         self.primitives_arr = primitives
         self.blocks_arr = blocks
         print(self.primitives_arr, self.blocks_arr)
-        for i in self.primitives_arr:
-            print(i.primitive.get_name())
-        for i in self.blocks_arr:
-            print(i.block.get_name())
-            print(type(i).__name__)
         self.visualize_hierarchy()
 
     def visualize_hierarchy(self, root=None):
@@ -48,7 +41,7 @@ class HierarchyWindow(QMainWindow):
         :return:
         """
 
-        self.model.setRowCount(0)
+        #self.model.setRowCount(0)
         if root is None:
             root = self.model.invisibleRootItem()
 
@@ -58,7 +51,6 @@ class HierarchyWindow(QMainWindow):
 
         for block in self.blocks_arr:
             name, typ = self.__dfs(block)
-
             root.appendRow([name, typ])
 
     def __dfs(self, base_obj):
@@ -66,7 +58,13 @@ class HierarchyWindow(QMainWindow):
             name = QStandardItem(base_obj.primitive.get_name())
             typ = QStandardItem(type(base_obj.primitive).__name__)
             return name, typ
-        else:
+
+        elif type(base_obj).__name__ == "Primitive":
+            name = QStandardItem(base_obj.get_name())
+            typ = QStandardItem(type(base_obj).__name__)
+            return name, typ
+
+        elif type(base_obj).__name__ == "BlockWidget":
             name = QStandardItem(base_obj.block.get_name())
             typ = QStandardItem(type(base_obj.block).__name__)
 
@@ -75,8 +73,21 @@ class HierarchyWindow(QMainWindow):
                 return name, typ
             else:
                 for elem in inner_blocks:
-                    inner_name, inner_typ = self.dfs(elem)
-                    name.appendRow([QStandardItem(inner_name), QStandardItem(inner_typ)])
+                    inner_name, inner_typ = self.__dfs(elem)
+                    name.appendRow([inner_name, inner_typ])
+                return name, typ
+
+        elif type(base_obj).__name__ == "Block":
+            name = QStandardItem(base_obj.get_name())
+            typ = QStandardItem(type(base_obj).__name__)
+
+            inner_blocks = base_obj.get_inner_blocks_list()
+            if len(inner_blocks) == 0:
+                return name, typ
+            else:
+                for elem in inner_blocks:
+                    inner_name, inner_typ = self.__dfs(elem)
+                    name.appendRow([inner_name, inner_typ])
                 return name, typ
 
 

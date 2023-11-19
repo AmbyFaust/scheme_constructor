@@ -4,6 +4,7 @@ from pathlib import Path
 from functools import partial
 import subprocess
 
+
 class WindowChecker(QWidget):
     """
     Window for working with checker
@@ -33,26 +34,21 @@ class WindowChecker(QWidget):
         layout.addWidget(self.tree)
         self.setLayout(layout)
 
-
     def openMenu(self, position):
         mdlIdx = self.tree.indexAt(position)
+        path = str(Path(self.model.filePath(mdlIdx)).name)
+
         right_click_menu = QMenu()
         act_add = right_click_menu.addAction(self.tr("Run checker"))
-        act_add.triggered.connect(partial(self.run_checker, mdlIdx))
+        act_add.triggered.connect(partial(self.run_checker, path))
         right_click_menu.exec_(self.sender().viewport().mapToGlobal(position))
 
-
-    def run_checker(self, mdlIdx):
-        path = Path(self.model.filePath(mdlIdx))
-        args = "../stubs/stub_checker.exe " + path.name
-        output = subprocess.run(args, capture_output=True)
-        print(f"out: {output.stdout}, \nerror: {output.stderr}")
-
-    def run_button(self):
-        """
-        To run checker
-        :return:
-        """
-        print('hello')
-        print('run_button')
-        pass
+    def run_checker(self, path: str):
+        try:
+            args = "./stubs/stub_checker.exe " + self.dir_path + path
+            output = subprocess.run(args, capture_output=True)
+            print(f"out: {output.stdout}, \nerror: {output.stderr}")
+            if output.returncode != 0:
+                raise Exception(output.stderr)
+        except Exception as exc:
+            print(f"Something go wrong in checker, LOG: {exc}")
