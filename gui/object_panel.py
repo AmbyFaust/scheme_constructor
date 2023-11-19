@@ -83,9 +83,11 @@ class ObjectPanel(QListWidget):
         new_el = ObjectItem("", obj)
         for ind in range(self.count()):
             item = self.item(ind)
-            if item.whatsThis() == "" and item.getStoredObject.name_label.text() == obj.name_label.text():
-                item.setStoredObject(obj)
-                return
+            if item.whatsThis() == "":
+                checking = item.getStoredObject()
+                if checking.name_label.text() == obj.name_label.text():
+                    item.setStoredObject(obj)
+                    return
         if isinstance(obj, BlockWidget):
             self.addItem(new_el)
         elif isinstance(obj, PrimitiveWidget):
