@@ -357,30 +357,6 @@ class Block(BaseGraphicsModel):
         self._pin_nets = pin_nets
         self._link = link
 
-        self._inner_objects = self._init_inner_blocks_and_connections()
-
-    def _init_inner_blocks_and_connections(self) -> List[BaseGraphicsModel]:
-        """
-        Инициализирует внутренние блоки и соединения, принадлежащие этой блок-схеме.
-
-        Returns:
-            List[BaseGraphicsModel]: Список внутренних блоков и соединений.
-        """
-        inner_objects = []
-        for obj in self._objects:
-            name = obj.get_name()
-            link = obj.get_link()
-            object_type = obj.get_object_type()
-            if object_type == 'primitive':
-                new_object = Primitive(name, [], obj.get_top_left(),
-                                       obj.get_width(), obj.get_height(), link)
-            else:
-                new_object = Block(name, [], [], [],
-                                   obj.get_top_left(), obj.get_width(), obj.get_height(), link)
-
-            inner_objects.append(new_object)
-        return inner_objects
-
     def get_name(self) -> str:
         """
         Возвращает имя блок-схемы.
@@ -452,12 +428,3 @@ class Block(BaseGraphicsModel):
             pin_nets (List[PinNet]): Новый список соединений пинов.
         """
         self._pin_nets = pin_nets
-
-    def get_inner_objects(self) -> List[BaseGraphicsModel]:
-        """
-        Возвращает список внутренних блоков и соединений, принадлежащих этой блок-схеме.
-
-        Returns:
-            List[BaseGraphicsModel]: Список внутренних блоков и соединений.
-        """
-        return self._inner_objects
