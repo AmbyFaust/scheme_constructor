@@ -428,3 +428,21 @@ class Block(BaseGraphicsModel):
             pin_nets (List[PinNet]): Новый список соединений пинов.
         """
         self._pin_nets = pin_nets
+
+    def get_link(self) -> str:
+        """
+        Возвращает ссылку на блок в виде строки.
+
+        Returns:
+            str: ссылка в виде строки.
+        """
+        return self._link
+
+    def set_link(self, link: str):
+        """
+        Устанавливает новую ссылку на блок.
+
+        Args:
+            link str: Новый список ссылка на блок.
+        """
+        self._link = link
