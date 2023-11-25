@@ -2,8 +2,12 @@
 #define NETLIST_H
 
 
+#include <QDebug>
+#include <string>
+#include <fstream>
 #include <iostream>
 #include <vector>
+#include <map>
 #include <set>
 #include <utility>
 
