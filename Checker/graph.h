@@ -16,6 +16,10 @@ public:
 	void del_vertex(unsigned int v);
 
 	unsigned int get_components_cnt() const;
+
+	unsigned int get_vertex_cnt() const { return vertex_cnt; } //Pavel
+	std::vector<unsigned int >& get_edges(unsigned int vertex) { return adjacency_array[vertex]; }
+
 	bool is_cycled() const;
 
 	void show();

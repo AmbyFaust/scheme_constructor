@@ -34,3 +34,4 @@ void write_check_result(std::string filename, std::string res)
 		out << res << std::endl;
 	out.close();
 }
+
