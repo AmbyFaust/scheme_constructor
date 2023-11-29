@@ -14,7 +14,7 @@ class PrimitiveWidget(QWidget):
         super(PrimitiveWidget, self).__init__(parent)
         self.setAttribute(Qt.WA_StyledBackground, True)
         self.primitive = primitive
-        self.move(*primitive.get_top_left())
+        self.move(*primitive.get_top_left()[::-1])
         self.setFixedWidth(primitive.get_width())
         self.setFixedHeight(primitive.get_height())
 
@@ -53,7 +53,7 @@ class PrimitiveWidget(QWidget):
         self.set_name_action.triggered.connect(self.set_name)
         self.del_action = QAction("Удалить", self)
         self.del_action.triggered.connect(self.delete)
-
+        ######self.del_action.setVisible(False)
     def show_context_menu(self, position):
         context_menu = QMenu(self)
         context_menu.setStyleSheet("background-color: gray;")

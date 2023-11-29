@@ -13,7 +13,7 @@ class BlockWidget(QWidget):
         super(BlockWidget, self).__init__(parent)
         self.setAttribute(Qt.WA_StyledBackground, True)
         self.block = block
-        self.move(*block.get_top_left())
+        self.move(*block.get_top_left()[::-1])
         self.setFixedWidth(block.get_width())
         self.setFixedHeight(block.get_height())
 

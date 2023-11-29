@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QListWidget, QWidget, QAction, QMenu
 
 from gui.object_item import ObjectItem, PrimitiveWidget, BlockWidget, createNewPrimitiveObjectItem
 
+from gui.primitive_creator import PrimitiveCreator
 
 class ObjectPanel(QListWidget):
     def __init__(self):
@@ -38,7 +39,12 @@ class ObjectPanel(QListWidget):
         return item
 
     def handleDoubleClick(self, item):
-        self.objAddRequested.emit(item.getStoredObject())
+        if item.whatsThis() == "uneditable":
+            self.window = PrimitiveCreator(self)
+            self.window.work_zone.objSaveRequested.connect(self.registerObject)
+            #self.window.show()
+        else:
+            self.objAddRequested.emit(item.getStoredObject())
 
     def removeItem(self):
         selected_items = self.selectedItems()
