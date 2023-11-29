@@ -9,7 +9,7 @@ from settings import rendering_widget_width, rendering_widget_height
 
 
 class BlockWidget(QWidget):
-    def __init__(self, parent, block: Block):
+    def __init__(self, parent, block: Block, pins: list = None):
         super(BlockWidget, self).__init__(parent)
         self.setAttribute(Qt.WA_StyledBackground, True)
         self.block = block
@@ -29,6 +29,7 @@ class BlockWidget(QWidget):
         self.__create_layouts()
         self.__create_actions()
         self.unlock()
+        self.__create_pin_widgets(pins)
 
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.show_context_menu)
@@ -46,17 +47,19 @@ class BlockWidget(QWidget):
         self.setLayout(common_v_layout)
 
     def __create_actions(self):
-        self.add_pin_action = QAction("Добавить Пин", self)
-        self.add_pin_action.triggered.connect(self.add_pin)
         self.set_name_action = QAction("Изменить имя", self)
         self.set_name_action.triggered.connect(self.set_name)
         self.del_action = QAction("Удалить", self)
         self.del_action.triggered.connect(self.delete)
 
+    def __create_pin_widgets(self, pins: list = None):
+        if pins:
+            for pin in pins:
+                self.pin_widgets.append(self.parent().add_pin(self, pin))
+
     def show_context_menu(self, position):
         context_menu = QMenu(self)
         context_menu.setStyleSheet("background-color: gray;")
-        context_menu.addAction(self.add_pin_action)
         context_menu.addAction(self.set_name_action)
         context_menu.addAction(self.del_action)
         if not self.parent().rendered_wire:
@@ -74,11 +77,8 @@ class BlockWidget(QWidget):
     def delete(self):
         while self.pin_widgets:
             self.pin_widgets[0].delete()
-        self.parent().block_widgets.pop(self)
+        self.parent().all_block_widgets.pop(self)
         self.deleteLater()
-
-    def add_pin(self):
-        self.parent().add_pin(self)
 
     def set_name(self):
         set_name_dialog = SetNameDialog(self.name_label.text())

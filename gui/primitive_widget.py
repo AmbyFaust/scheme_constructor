@@ -10,7 +10,7 @@ from settings import primitive_width, primitive_height, rendering_widget_width, 
 
 
 class PrimitiveWidget(QWidget):
-    def __init__(self, parent, primitive: Primitive):
+    def __init__(self, parent, primitive: Primitive, pins: list = None):
         super(PrimitiveWidget, self).__init__(parent)
         self.setAttribute(Qt.WA_StyledBackground, True)
         self.primitive = primitive
@@ -30,6 +30,7 @@ class PrimitiveWidget(QWidget):
         self.__create_layouts()
         self.__create_actions()
         self.unlock()
+        self.__create_pin_widgets(pins)
 
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.show_context_menu)
@@ -54,6 +55,11 @@ class PrimitiveWidget(QWidget):
         self.del_action = QAction("Удалить", self)
         self.del_action.triggered.connect(self.delete)
 
+    def __create_pin_widgets(self, pins: list = None):
+        if pins:
+            for pin in pins:
+                self.pin_widgets.append(self.parent().add_pin(self, pin))
+
     def show_context_menu(self, position):
         context_menu = QMenu(self)
         context_menu.setStyleSheet("background-color: gray;")
@@ -75,7 +81,7 @@ class PrimitiveWidget(QWidget):
     def delete(self):
         while self.pin_widgets:
             self.pin_widgets[0].delete()
-        self.parent().primitives_widgets.pop(self)
+        self.parent().all_primitive_widgets.pop(self)
         self.deleteLater()
 
     def add_pin(self):
