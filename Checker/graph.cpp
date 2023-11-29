@@ -125,7 +125,6 @@ bool Graph::dfs(unsigned int v, unsigned int p, std::vector<unsigned int>& visit
 		int to = this->adjacency_array[v][i];
 		if (to == p)
 			continue;
-		std::cout << "v: " << v << "to: " << to << std::endl;
 		if (visit_status[to] == 0) {
 			if (dfs(to, v, visit_status))
 				return true;

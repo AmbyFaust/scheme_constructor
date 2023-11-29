@@ -1,0 +1,5 @@
+﻿  test.cpp
+C:\Users\L-408-21\Desktop\MIPT\Cpract\Checker\Checker\graph.cpp(6,20): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\L-408-21\Desktop\MIPT\Cpract\Checker\Checker\graph.cpp(108,20): warning C4018: <: несоответствие типов со знаком и без знака
+C:\Users\L-408-21\Desktop\MIPT\Cpract\Checker\Checker\graph.cpp(109,21): warning C4018: <: несоответствие типов со знаком и без знака
+  sample_tests.vcxproj -> C:\Users\L-408-21\Desktop\MIPT\Cpract\Checker\x64\Debug\sample_tests.exe
