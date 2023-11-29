@@ -10,7 +10,7 @@ NetList parse_netlist()
     // creating containers for pins and pin_nets
     std::vector<std::string> pins{};
     std::vector<std::string> edge_pins{};
-    std::map<std::string, std::vector<std::string>> pin_nets{};
+    std::vector<std::vector<std::string>> pin_nets{};
 
     std::vector<NetList> blockList{};
 
@@ -62,7 +62,7 @@ NetList parse_netlist()
             std::vector<std::string> pinsVector{};
 
             const rapidjson::Value& pin_net = iter->value;                              // reading wire name
-            std::string net_name = pin_net["name"].GetString();
+//            std::string net_name = pin_net["name"].GetString();
 
             std::string pins = pin_net["pins"].GetString();                             // reading list of wire's pins
             size_t pos = 0;
@@ -73,7 +73,7 @@ NetList parse_netlist()
                 pins.erase(0, pos+1);
             }
             pinsVector.push_back(pins);
-            pin_nets.insert(std::make_pair(net_name, pinsVector));
+            pin_nets.push_back(pinsVector);
         }
     }
     NetList block(name, edge_pins, pins, pin_nets);

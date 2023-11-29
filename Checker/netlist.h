@@ -17,19 +17,18 @@ enum block_type {
 };
 
 
-class Object {
-public:
-    virtual block_type type() const = 0;
-    std::vector<int> pins;
-    virtual const std::vector<int>& get_pins() const { return pins; };
-};
-
-
-class Primitive : public Object
+class Object
 {
-protected:
+public:
     std::string name;
     std::vector<std::string> pins;
+
+    virtual block_type type() const = 0;
+    std::vector<int> int_pins;                                              // описание пинов интами
+};
+
+class Primitive : Object
+{
 public:
     Primitive() {}
     Primitive(std::string n, std::vector<std::string> vec_pins);
@@ -39,41 +38,38 @@ public:
     void show();
 
     block_type type() const override { return primitive;  };
+
+    const std::string& get_name() { return name; }
+    std::vector<std::string>& get_pins() { return pins; }
 };
 
-
-
-class NetList : public Object
+class NetList : Object
 {
 protected:
     // for testing
     std::vector<int> pins_int;
 
-    std::string name;                                           // name of block
-    std::vector<std::string> pins;                              // list of all pins
     std::vector<std::string> edge_pins;                         // list of pins which are located on edge of block
-    std::map<std::string, std::vector<std::string>> pin_nets;   // list of pins_connections
+    std::vector<std::vector<std::string>> pin_nets;             // list of pins_connections
 
     // inner elements
     std::vector<Object*> objects;
-    // inner connections
-    std::vector<std::set<int>> connections;
 
 public:
     NetList() {}
-    NetList(std::string n, std::vector <std::string> e_pins, std::vector<std::string> pins, std::map<std::string, std::vector<std::string>> m_pin_nets);
-    NetList(std::string n, std::vector<Object> objects, std::vector <std::string> e_pins, std::vector<std::string> pins, std::map<std::string, std::vector<std::string>> m_pin_nets);
+    NetList(std::string n, std::vector <std::string> e_pins, std::vector<std::string> pins, std::vector<std::vector<std::string>> m_pin_nets);
+    NetList(std::string n, std::vector<Object> objects, std::vector <std::string> e_pins, std::vector<std::string> pins, std::vector<std::vector<std::string>> m_pin_nets);
     NetList(std::vector<int> init_pins);
     ~NetList() = default;
 
     block_type type() const override { return netlist; };
     void add_connection(std::set<int> connection);
 
-    void show();                                                 // demonstration of class'es info
+    void show();                                         // demonstration of class'es info
 
-    const std::vector<std::set<int>>& get_connections() const { return connections; }
+    const std::string& get_name() const { return name; }
+    std::vector<std::string>& get_pins() { return pins; }
 };
-
 
 void test_objects();
 
