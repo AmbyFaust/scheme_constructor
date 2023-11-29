@@ -1,5 +1,5 @@
 from schema_classes import Pin, PinNet, Primitive, Block, Object
-from utils import json_to_dict
+from utils import json_to_dict, is_name_valid, is_type_valid, is_number_valid
 from typing import List, Tuple
 
 
@@ -7,19 +7,23 @@ def parse(filename):
     data = json_to_dict(filename)
 
     main_found = False
-    items = []
+    items = dict()
 
-    try:
-        for el in data:
-            if parse_type(el) == 'block':
-                items.append(parse_block(el))
-                main_found = main_found or (parse_name(el) == 'main')
-            elif parse_type(el) == 'primitive':
-                items.append(parse_primitive(el))
-        if not main_found:
-            raise RuntimeError('Block with name \"main\" not found.')
-    except KeyError as ke:
-        raise KeyError(f'Key {ke} was expected but not found.')
+    for el in data:
+        if parse_name(el) in items.keys():
+            raise RuntimeError('Block (or Primitive) with name \"{}\" already exists.'.format(parse_name(el)))
+
+        if parse_type(el) == 'block':
+            block = parse_block(el)
+            items[parse_name(el)] = block
+            main_found = main_found or (parse_name(el) == 'main')
+
+        elif parse_type(el) == 'primitive':
+            primitive = parse_primitive(el)
+            items[parse_name(el)] = primitive
+
+    if not main_found:
+        raise RuntimeError('Block with name \"main\" not found.')
 
     return items
 
@@ -69,8 +73,16 @@ def parse_pins(pins_dict) -> List[Pin]:
     return [parse_pin(pin_dict) for pin_dict in pins_dict['pins']]
 
 
+def parse_pin_by_name(name) -> Pin:
+    return Pin(name=name, top_left=(0, 0))
+
+
+def parse_pins_by_names(pin_names_dict) -> List[Pin]:
+    return [parse_pin_by_name(name) for name in pin_names_dict['pins']]
+
+
 def parse_pin_net(pin_net_dict) -> PinNet:
-    return PinNet(name=parse_name(pin_net_dict), pins=parse_pins(pin_net_dict), lines=parse_lines(pin_net_dict))
+    return PinNet(name=parse_name(pin_net_dict), pins=parse_pins_by_names(pin_net_dict), lines=parse_lines(pin_net_dict))
 
 
 def parse_pin_nets(pin_nets_dict) -> List[PinNet]:
@@ -78,32 +90,55 @@ def parse_pin_nets(pin_nets_dict) -> List[PinNet]:
 
 
 def parse_top_left(top_left_dict) -> tuple:
-    return tuple([top_left_dict['top'], top_left_dict['left']])
+    tl = top_left_dict['top_left']
+    if len(tl) == 2 and is_number_valid(tl[0]) and is_number_valid(tl[1]):
+        return tuple([tl[0], tl[1]])
+    raise RuntimeError(f'Top or left can not be parsed.')
 
 
 def parse_name(name_dict) -> str:
-    return name_dict['name']
+    if is_name_valid(name_dict['name']):
+        return name_dict['name']
+    raise RuntimeError(f'Name can not be parsed.')
 
 
 def parse_width(width_dict) -> int:
-    return width_dict['width']
+    if is_number_valid(width_dict['width']):
+        return width_dict['width']
+    raise RuntimeError(f'Width can not be parsed.')
 
 
 def parse_height(height_dict) -> int:
-    return height_dict['height']
+    if is_number_valid(height_dict['height']):
+        return height_dict['height']
+    raise RuntimeError(f'Height can not be parsed.')
 
 
 def parse_link(link_dict) -> str:
-    return link_dict['link']
+    if is_name_valid(link_dict['link'], 0):
+        return link_dict['link']
+    raise RuntimeError(f'Link can not be parsed.')
 
 
 def parse_type(type_dict) -> str:
-    return type_dict['type']
+    if is_type_valid(type_dict['type']):
+        return type_dict['type']
+    raise RuntimeError(f'Type can not be parsed.')
 
 
 def parse_lines(lines_dict) -> List[List[Tuple[int, int]]]:
-    return [
-        [tuple(lines_dict['lines'][i][0]),
-         tuple(lines_dict['lines'][i][0])]
-        for i in range(len(lines_dict['lines']))
-    ]
+    res = []
+    for line in lines_dict['lines']:
+        res_line = []
+        if len(line) != 2:
+            raise RuntimeError(f'Line must be represented by 2 points, {len(line)} were given.')
+        for point in line:
+            if len(point) != 2:
+                raise RuntimeError(f'Point must be represented by 2 numbers, {len(point)} were given.')
+            if is_number_valid(point[0]) and is_number_valid(point[1]):
+                res_line.append(tuple([point[0], point[1]]))
+            else:
+                raise RuntimeError(f'Top or left can not be parsed.')
+        res.append(res_line)
+
+    return res
