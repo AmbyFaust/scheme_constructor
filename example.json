@@ -2,31 +2,288 @@
   {
     "type": "block",
     "name": "main",
+    "width": 22,
+    "height": 9,
     "top": 0,
     "left": 0,
-    "width": 600,
-    "height": 400,
+    "objects": [
+      {
+        "name": "r1",
+        "type": "primitive",
+        "link": "resistor200ohm",
+        "top": 0,
+        "left": 0,
+        "width": 0,
+        "height": 0
+      },
+      {
+        "name": "gate1",
+        "type": "block",
+        "link": "common_base_2port",
+        "top": 1,
+        "left": 2,
+        "width": 8,
+        "height": 4
+      },
+      {
+        "name": "gate2",
+        "type": "block",
+        "link": "common_base_2port",
+        "top": 3,
+        "left": 12,
+        "width": 8,
+        "height": 4
+      }
+    ],
     "pins": [
       {
         "name": "in1",
-        "top": 200,
+        "top": 4,
+        "left": 0
+      },
+      {
+        "name": "in2",
+        "top": 6,
         "left": 0
       },
       {
         "name": "out1",
-        "top": 200,
-        "left": 600
+        "top": 4,
+        "left": 22
+      },
+      {
+        "name": "out2",
+        "top": 6,
+        "left": 22
+      },
+      {
+        "name": "r1.p1",
+        "top": 6.5,
+        "left": 5
+      },
+      {
+        "name": "r1.p2",
+        "top": 6.5,
+        "left": 7
+      },
+      {
+        "name": "gate1.nw",
+        "top": 2,
+        "left": 2
+      },
+      {
+        "name": "gate1.sw",
+        "top": 4,
+        "left": 2
+      },
+      {
+        "name": "gate1.ne",
+        "top": 2,
+        "left": 10
+      },
+      {
+        "name": "gate1.se",
+        "top": 4,
+        "left": 10
+      },
+      {
+        "name": "gate2.nw",
+        "top": 4,
+        "left": 12
+      },
+      {
+        "name": "gate2.sw",
+        "top": 6,
+        "left": 12
+      },
+      {
+        "name": "gate2.ne",
+        "top": 4,
+        "left": 20
+      },
+      {
+        "name": "gate2.se",
+        "top": 6,
+        "left": 20
       }
     ],
     "pin_nets": [
       {
         "name": "n1",
-        "pins": ["in1", "out1"],
+        "pins": ["in1", "gate1.sw"],
         "lines": [
-          [[200, 0], [200, 600]]
+          [[4, 0], [4, 2]]
+        ]
+      },
+      {
+        "name": "n2",
+        "pins": ["in2", "gate1.nw", "r1.p1"],
+        "lines": [
+          [[6, 0], [6, 1]],
+          [[6, 1], [2, 1]],
+          [[2, 1], [2, 2]],
+          [[6, 1], [7, 1]],
+          [[7, 1], [7, 5]]
+        ]
+      },
+      {
+        "name": "n3",
+        "pins": ["gate1.se", "gate2.nw"],
+        "lines": [
+          [[4, 10], [4, 12]]
+        ]
+      },
+      {
+        "name": "n4",
+        "pins": ["r1.p2", "gate1.ne", "gate2.sw"],
+        "lines": [
+          [[7, 7], [7, 11]],
+          [[7, 11], [6, 11]],
+          [[6, 11], [6, 12]],
+          [[6, 11], [2, 11]],
+          [[2, 11], [2, 9]]
+        ]
+      },
+      {
+        "name": "n5",
+        "pins": ["gate2.ne", "out1"],
+        "lines": [
+          [[4, 20], [4, 22]]
+        ]
+      },
+      {
+        "name": "n6",
+        "pins": ["gate2.se", "out2"],
+        "lines": [
+          [[6, 20], [6, 22]]
         ]
       }
+    ]
+  },
+  {
+    "type": "block",
+    "name": "common_base_2port",
+    "width": 10,
+    "height": 5,
+    "top": 0,
+    "left": 26,
+    "objects": [
+      {
+        "name": "bjt1",
+        "type": "primitive",
+        "link": "bjt_type1",
+        "top": 1.5,
+        "left": 4,
+        "width": 2,
+        "height": 1
+      }
     ],
-    "objects": []
+    "pins": [
+      {
+        "name": "nw",
+        "top": 2,
+        "left": 0
+      },
+      {
+        "name": "sw",
+        "top": 4,
+        "left": 0
+      },
+      {
+        "name": "ne",
+        "top": 2,
+        "left": 10
+      },
+      {
+        "name": "se",
+        "top": 4,
+        "left": 10
+      },
+      {
+        "name": "bjt1.e",
+        "top": 1.5,
+        "left": 4
+      },
+      {
+        "name": "bjt1.c",
+        "top": 1.5,
+        "left": 6
+      },
+      {
+        "name": "bjt1.b",
+        "top": 2.5,
+        "left": 5
+      }
+    ],
+    "pin_nets": [
+      {
+        "name": "net_nw",
+        "pins": ["nw", "bjt1.e"],
+        "lines": [
+          [[2, 0], [2, 4]]
+        ]
+      },
+      {
+        "name": "net_ne",
+        "pins": ["bjt1.c", "ne"],
+        "lines": [
+          [[2, 6], [2, 10]]
+        ]
+      },
+      {
+        "name": "net_s",
+        "pins": ["sw", "se", "bjt1.c"],
+        "lines": [
+          [[4, 0], [4, 5]],
+          [[4, 5], [4, 10]],
+          [[4, 5], [2.5, 5]]
+        ]
+      }
+    ]
+  },
+  {
+    "type": "primitive",
+    "name": "resistor200ohm",
+    "width": 2,
+    "height": 1,
+    "top": 0,
+    "left": 0,
+    "pins": [
+      {
+        "name": "p1",
+        "top": 0.5,
+        "left": 0
+      },
+      {
+        "name": "p2",
+        "top": 0.5,
+        "left": 2
+      }
+    ]
+  },
+  {
+    "type": "primitive",
+    "name": "bjt_type1",
+    "width": 2,
+    "height": 1,
+    "top": 0,
+    "left": 0,
+    "pins": [
+      {
+        "name": "e",
+        "top": 0.5,
+        "left": 0
+      },
+      {
+        "name": "c",
+        "top": 0.5,
+        "left": 2
+      },
+      {
+        "name": "b",
+        "top": 1,
+        "left": 1
+      }
+    ]
   }
 ]
