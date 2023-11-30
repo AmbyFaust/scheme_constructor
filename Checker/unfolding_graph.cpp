@@ -1,6 +1,7 @@
 #include "unfolding_graph.h"
+#include "check_tools.h"
 
-std::unordered_map<std::string, std::pair<size_t, size_t>> pins_to_Vertexes(const std::vector<std::string>& pins)
+std::unordered_map<std::string, std::pair<size_t, size_t>> pins_to_Vertices(const std::vector<std::string>& pins)
 /* Функция вызывается в Graph recurcive_check(const NetList& scheme);
 * Составление unordered_map из пинов
   ключом будет название пина, а элементом пара
@@ -12,8 +13,8 @@ std::unordered_map<std::string, std::pair<size_t, size_t>> pins_to_Vertexes(cons
 * предполагается, что пины соотвествующие одному вложенному блоку идут подряд
 */
 {	
-	std::unordered_map<std::string, std::pair<size_t, size_t>> vertexes;
-	vertexes.reserve(pins.size());
+	std::unordered_map<std::string, std::pair<size_t, size_t>> vertices;
+	vertices.reserve(pins.size());
 
 	size_t index = 0;
 	std::string block_name;
@@ -32,33 +33,33 @@ std::unordered_map<std::string, std::pair<size_t, size_t>> pins_to_Vertexes(cons
 			// очередной пин отностися к прошлому блоку
 			{ 
 				--index;
-				vertexes[pins[i]] = std::make_pair(i, index);
+				vertices[pins[i]] = std::make_pair(i, index);
 			}
 			else 
 			// пин относится к новому блоку
 			{ 
-				vertexes[pins[i]] = std::make_pair(i, index);
+				vertices[pins[i]] = std::make_pair(i, index);
 				block_name = substring;
 			}
 		}
 		else
 		// не нашли символ, значит работаем с внешним пином
 		{
-			vertexes[pins[i]] = std::make_pair(i, index);
+			vertices[pins[i]] = std::make_pair(i, index);
 		}
 		++index;
 	}
-	return vertexes;
+	return vertices;
 
 }
 
 void add_inner_components(const NetList& scheme, Graph& main_graph, 
-	std::unordered_map<std::string, std::pair<size_t, size_t>>& vertexes)
+	std::unordered_map<std::string, std::pair<size_t, size_t>>& vertices)
 /* Функция вызывается в Graph recurcive_check(const NetList& scheme);
 * Добавление в граф внутренних компонент нетлиста 
 */
 {
-	for (Object* object : scheme.get_elements())
+	for (Object* object : scheme.get_objects())
 	{
 		std::string name = object->get_name();
 		if (object->type() == primitive)
@@ -71,7 +72,7 @@ void add_inner_components(const NetList& scheme, Graph& main_graph,
 				for (size_t i = 0; i < object->get_pins().size(); ++i)
 				{
 					std::string pin = name + '.' + object->get_pins()[i];
-					main_graph.add_edge(vertexes.at(pin).first, common_vertex);
+					main_graph.add_edge(vertices.at(pin).first, common_vertex);
 				}
 			}
 			else
@@ -79,13 +80,19 @@ void add_inner_components(const NetList& scheme, Graph& main_graph,
 			{
 				std::string pin1 = name + '.' + object->get_pins()[0];
 				std::string pin2 = name + '.' + object->get_pins()[1];
-				main_graph.add_edge(vertexes.at(pin1).first, vertexes.at(pin2).first);
+				main_graph.add_edge(vertices.at(pin1).first, vertices.at(pin2).first);
 			}
 		}
 		else if (object->type() == netlist) {
 			NetList* subScheme = dynamic_cast<NetList*>(object);
 			if (subScheme) {
 				Graph add_graph = recurcive_check(*subScheme);
+				/// добавить проверку на Graph(1) прервать работу,выдать ошибку
+				/*if (add_graph == Graph(1))
+				{
+					main_graph = Graph(1);
+					return;
+				}*/
 				// соединяем основной граф и граф получившийся после проверки вложенного нетлиста
 				unsigned int main_graph_back = main_graph.get_vertex_cnt(); // индекс для вставки новых вершин
 
@@ -96,11 +103,11 @@ void add_inner_components(const NetList& scheme, Graph& main_graph,
 					subVertexes[subScheme->get_pins()[i]] = i;
 					main_graph.add_vertex();
 				}
-				for (std::string pin : subScheme->get_outterPins())
+				for (std::string pin : subScheme->get_edge_pins())
 				// соединение внешних пинов вложенной схемы с основным графом
 				{
 					std::string pin_in_main = name + '.' + pin;
-					main_graph.add_edge(vertexes[pin_in_main].first, subVertexes[pin] + main_graph_back);
+					main_graph.add_edge(vertices[pin_in_main].first, subVertexes[pin] + main_graph_back);
 				}
 				for (std::string pin : subScheme->get_pins())
 				// добавление соединений из внутреннего графа в основной
@@ -115,32 +122,30 @@ void add_inner_components(const NetList& scheme, Graph& main_graph,
 
 Graph recurcive_check(const NetList& scheme)
 {
-	std::unordered_map<std::string, std::pair<size_t, size_t>> vertexes;
-	vertexes = pins_to_Vertexes(scheme.get_pins());
+	std::unordered_map<std::string, std::pair<size_t, size_t>> vertices;
+	vertices = pins_to_Vertices(scheme.get_pins());
 
-	Graph upper_graph(scheme.get_outterPins().size() + scheme.get_elements().size()); //граф для проверки верхнего уровня
+	Graph upper_graph(scheme.get_edge_pins().size() + scheme.get_objects().size()); //граф для проверки верхнего уровня
 	Graph main_graph(scheme.get_pins().size()); //общий граф
 
-	for (const std::vector<std::string> connect : scheme.get_connections())
+	for (const std::vector<std::string> connect : scheme.get_pin_nets())
 	// соединение вершин основного графа, соединение вершин графа верхнего уровня иерархии
 	{
 		// соединение происходит по кругу (первый со вторым, второй с третьим, третий с первым).
 		for (size_t i = 0; i < connect.size() - 1; ++i)
 		{
-			/*unsigned int v1_main = vertexes[connect[i]].first;
-			unsigned int v1_upper = vertexes[connect[i]].second;
-			unsigned int v2_main = vertexes[connect[i+1]].first;
-			unsigned int v2_upper = vertexes[connect[i+1]].second;*/
-			unsigned int v1_main = vertexes.at(connect[i]).first;
-			unsigned int v1_upper = vertexes.at(connect[i]).second;
-			unsigned int v2_main = vertexes.at(connect[i + 1]).first;
-			unsigned int v2_upper = vertexes.at(connect[i + 1]).second;
+			unsigned int v1_main = vertices.at(connect[i]).first;
+			unsigned int v1_upper = vertices.at(connect[i]).second;
+			unsigned int v2_main = vertices.at(connect[i + 1]).first;
+			unsigned int v2_upper = vertices.at(connect[i + 1]).second;
 
 			main_graph.add_edge(v1_main, v2_main);
 			upper_graph.add_edge(v1_upper, v2_upper);
 		}
-		main_graph.add_edge(vertexes.at(connect[0]).first, vertexes.at(connect.back()).first);
-		upper_graph.add_edge(vertexes.at(connect[0]).second, vertexes.at(connect.back()).second);
+		if (connect.size() > 2) {
+			main_graph.add_edge(vertices.at(connect[0]).first, vertices.at(connect.back()).first);
+			upper_graph.add_edge(vertices.at(connect[0]).second, vertices.at(connect.back()).second);
+		}
 	}
 
 	if (upper_hierarchy_check(upper_graph))
@@ -149,7 +154,7 @@ Graph recurcive_check(const NetList& scheme)
 		return Graph(1);
 	}
 
-	add_inner_components(scheme, main_graph, vertexes);
+	add_inner_components(scheme, main_graph, vertices);
 	
 	return main_graph;
 }

@@ -6,11 +6,7 @@ Primitive::Primitive(std::string n, std::vector<std::string> vec_pins)
     name = n;                                                               //name of primitive
     pins = vec_pins;                                                        //list of pins
 }
-
-Primitive::Primitive(std::vector<int> init_pins)
-{
-    int_pins = init_pins;
-}                                                                           // default constructor
+                                                                     
 
 NetList::NetList(std::string n, std::vector<std::string> e_pins,            // classic constructor
                  std::vector<std::string> vec_pins, std::vector<std::vector<std::string>> m_pin_nets)
@@ -21,10 +17,21 @@ NetList::NetList(std::string n, std::vector<std::string> e_pins,            // c
     pin_nets = m_pin_nets;                                                  // map of pin_connections
 }
 
-NetList::NetList(std::vector<int> init_pins)
+NetList::NetList(std::string name_, std::vector<std::string> pins_, std::vector <std::string> edge_pins_,
+    std::vector<Object*> objects_) // for tests
 {
-    pins_int = init_pins;
+    name = name_;
+    pins = pins_;
+    edge_pins = edge_pins_;
+    objects = objects_;
 }
+
+void NetList::set_connections(const std::vector<std::vector<std::string>> pin_nets_) // for tests
+{
+    pin_nets = pin_nets_;
+}
+
+
 
 void NetList::show()
 {
@@ -49,12 +56,4 @@ void Primitive::show()
     for (const auto& pin : this->pins)
         std::cout << pin << ' ';
     std::cout << "\n";
-}
-
-
-void NetList::add_connection(std::vector<std::string> pin_connection)
-{
-    if (pin_connection.size() < 2)
-        return;
-    connections.push_back(pin_connection); 
 }

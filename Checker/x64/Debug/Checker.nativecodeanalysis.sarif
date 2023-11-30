@@ -1,0 +1,59 @@
+{
+  "version": "2.1.0",
+  "$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.5.json",
+  "runs": [
+    {
+      "results": [],
+      "tool": {
+        "driver": {
+          "name": "PREfast",
+          "fullName": "PREfast Code Analysis",
+          "version": "14.37.32822.0",
+          "informationUri": "https://aka.ms/cpp/ca"
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true
+        }
+      ],
+      "artifacts": [
+        {
+          "location": {
+            "uri": "file:///c:/users/pavel/documents/github/scheme_constructor/checker/checker.cpp"
+          },
+          "roles": [
+            "analysisTarget"
+          ],
+          "hashes": {
+            "sha-256": "7c8afbda7e1b1e97d0884d127653e1ac30a754015674715d4dee5f7571ec7d95"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/pavel/documents/github/scheme_constructor/checker/netlist.h"
+          },
+          "hashes": {
+            "sha-256": "d905ac9982359760ddbb79855e6a114623b2cfb035a37b78f5447479bb63f327"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/pavel/documents/github/scheme_constructor/checker/parse_tools.h"
+          },
+          "hashes": {
+            "sha-256": "265fe2a5155a46617e71831578c61f738ade538b7aac8d11fff3512a7c9a7e59"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///c:/users/pavel/documents/github/scheme_constructor/checker/graph.h"
+          },
+          "hashes": {
+            "sha-256": "6b94c073d8b471cbc08912c6221e6c681a439d27759947eefe0566ed4f60daca"
+          }
+        }
+      ]
+    }
+  ]
+}

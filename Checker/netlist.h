@@ -2,7 +2,7 @@
 #define NETLIST_H
 
 
-#include <QDebug>
+//#include <QDebug>
 #include <string>
 #include <fstream>
 #include <iostream>
@@ -20,55 +20,56 @@ enum block_type {
 class Object
 {
 public:
-    std::string name;
-    std::vector<std::string> pins;
+    const std::string& get_name() const{ return name; }
+    const std::vector<std::string>& get_pins() const { return pins; }
 
     virtual block_type type() const = 0;
-    std::vector<int> int_pins;                                              // описание пинов интами
+    virtual ~Object() = default;
+protected:
+    std::string name;
+    std::vector<std::string> pins;
 };
 
-class Primitive : Object
+class Primitive : public Object
 {
 public:
     Primitive() {}
     Primitive(std::string n, std::vector<std::string> vec_pins);
-    Primitive(std::vector<int> init_pins);
     ~Primitive() = default;
 
     void show();
 
     block_type type() const override { return primitive;  };
-
-    const std::string& get_name() { return name; }
-    std::vector<std::string>& get_pins() { return pins; }
 };
 
-class NetList : Object
+class NetList : public Object
 {
 protected:
-    // for testing
-    std::vector<int> pins_int;
 
     std::vector<std::string> edge_pins;                         // list of pins which are located on edge of block
     std::vector<std::vector<std::string>> pin_nets;             // list of pins_connections
-
-    // inner elements
-    std::vector<Object*> objects;
+    std::vector<Object*> objects;                               // inner elements
 
 public:
     NetList() {}
-    NetList(std::string n, std::vector <std::string> e_pins, std::vector<std::string> pins, std::vector<std::vector<std::string>> m_pin_nets);
-    NetList(std::string n, std::vector<Object> objects, std::vector <std::string> e_pins, std::vector<std::string> pins, std::vector<std::vector<std::string>> m_pin_nets);
-    NetList(std::vector<int> init_pins);
+    NetList(std::string n, std::vector <std::string> e_pins, std::vector<std::string> pins,
+        std::vector<std::vector<std::string>> m_pin_nets);
+    NetList(std::string n, std::vector<Object*> objects, std::vector <std::string> e_pins, std::vector<std::string> pins,
+        std::vector<std::vector<std::string>> m_pin_nets);
+
+    NetList(std::string name_, std::vector<std::string> pins_, std::vector <std::string> edge_pins_,
+        std::vector<Object*> objects_); //for tests
+    void set_connections(const std::vector<std::vector<std::string>> pin_nets_); // for tests
+
     ~NetList() = default;
 
     block_type type() const override { return netlist; };
-    void add_connection(std::set<int> connection);
 
     void show();                                         // demonstration of class'es info
 
-    const std::string& get_name() const { return name; }
-    std::vector<std::string>& get_pins() { return pins; }
+    const std::vector<std::string>& get_edge_pins() const{ return edge_pins; }
+    const std::vector<std::vector<std::string>>& get_pin_nets() const { return pin_nets; }
+    const std::vector<Object*>& get_objects() const { return objects; }
 };
 
 void test_objects();
