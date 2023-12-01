@@ -14,7 +14,7 @@ class MainWindow(QMainWindow):
         self.setMinimumWidth(400)
         self.setMinimumHeight(200)
 
-        self.redactor = window_redactor.WindowRedactor()
+        self.redactor = window_redactor.WindowRedactor(dir_path="./scheme_json_files/")
         self.checker = window_checker.WindowChecker(dir_path="./scheme_json_files/")
 
         self.button_redactor = QPushButton(self, text="Open Redactor")

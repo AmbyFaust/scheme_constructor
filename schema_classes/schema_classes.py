@@ -200,6 +200,8 @@ class Primitive(BaseGraphicsModel):
         self._pins = pins
         self._link = link
 
+    def get_type(self):
+        return "primitive"
     def get_name(self) -> str:
         """
         Возвращает имя примитива.
@@ -357,6 +359,8 @@ class Block(BaseGraphicsModel):
         self._pin_nets = pin_nets
         self._link = link
 
+    def get_type(self):
+        return "block"
     def get_name(self) -> str:
         """
         Возвращает имя блок-схемы.
