@@ -1,4 +1,5 @@
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QRegExp
+from PyQt5.QtGui import QRegExpValidator
 from PyQt5.QtWidgets import QDialog, QWidget, QLineEdit, QPushButton, QVBoxLayout, QFormLayout, QHBoxLayout
 
 
@@ -15,6 +16,7 @@ class SetNameDialog(QDialog):
 
     def __create_widgets(self):
         self.name_edit = QLineEdit(self.cur_name)
+        self.name_edit.setPlaceholderText("Если это примитив, то формат `prim_name.*` ");
 
         self.accept_btn = QPushButton('Принять')
         self.cancel_btn = QPushButton('Отмена')

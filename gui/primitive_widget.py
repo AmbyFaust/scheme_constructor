@@ -1,20 +1,21 @@
+import re
 
 from PyQt5.QtCore import QPoint, Qt
 from PyQt5.QtGui import QCursor, QMouseEvent
 from PyQt5.QtWidgets import QWidget, QMenu, QAction, QVBoxLayout, QLabel, QDialog
 
-from core.schema_classes import Primitive
+from schema_classes.schema_classes import Primitive
 from gui.pin_widget import PinWidget
 from gui.set_name_dialog import SetNameDialog
 from settings import primitive_width, primitive_height, rendering_widget_width, rendering_widget_height
 
 
 class PrimitiveWidget(QWidget):
-    def __init__(self, parent, primitive: Primitive):
+    def __init__(self, parent, primitive: Primitive, pins: list = None):
         super(PrimitiveWidget, self).__init__(parent)
         self.setAttribute(Qt.WA_StyledBackground, True)
         self.primitive = primitive
-        self.move(primitive.get_left(), primitive.get_top())
+        self.move(*primitive.get_top_left()[::-1])
         self.setFixedWidth(primitive.get_width())
         self.setFixedHeight(primitive.get_height())
 
@@ -30,6 +31,7 @@ class PrimitiveWidget(QWidget):
         self.__create_layouts()
         self.__create_actions()
         self.unlock()
+        self.__create_pin_widgets(pins)
 
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.show_context_menu)
@@ -54,6 +56,11 @@ class PrimitiveWidget(QWidget):
         self.del_action = QAction("Удалить", self)
         self.del_action.triggered.connect(self.delete)
 
+    def __create_pin_widgets(self, pins: list = None):
+        if pins:
+            for pin in pins:
+                self.pin_widgets.append(self.parent().add_pin(self, pin))
+
     def show_context_menu(self, position):
         context_menu = QMenu(self)
         context_menu.setStyleSheet("background-color: gray;")
@@ -75,7 +82,7 @@ class PrimitiveWidget(QWidget):
     def delete(self):
         while self.pin_widgets:
             self.pin_widgets[0].delete()
-        self.parent().primitives_widgets.pop(self)
+        self.parent().all_primitive_widgets.pop(self)
         self.deleteLater()
 
     def add_pin(self):
@@ -84,8 +91,15 @@ class PrimitiveWidget(QWidget):
     def set_name(self):
         set_name_dialog = SetNameDialog(self.name_label.text())
         if set_name_dialog.exec_() == QDialog.Accepted:
-            self.primitive.set_name(set_name_dialog.name_edit.text())
-            self.name_label.setText(self.primitive.get_name())
+            if set_name_dialog.name_edit.text() not in self.parent().get_primitive_names() and\
+                    re.match("[A-Za-z0-9]+$", set_name_dialog.name_edit.text()):
+                self.primitive.set_name(set_name_dialog.name_edit.text())
+                self.name_label.setText(self.primitive.get_name())
+
+                for pin_widg in self.pin_widgets:
+                    pin_widg.name_label.setText(f"{self.primitive.get_name()}.{pin_widg.pin.get_name().split('.')[1]}")
+                    pin_widg.pin.set_name(f"{self.primitive.get_name()}.{pin_widg.pin.get_name().split('.')[1]}")
+                    print(pin_widg.pin.get_name())
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton and not self.parent().rendered_wire:
