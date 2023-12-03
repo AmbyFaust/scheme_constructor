@@ -10,6 +10,7 @@ from gui.crossroad_widget import CrossroadWidget
 from gui.pin_widget import PinWidget
 from gui.primitive_widget import PrimitiveWidget
 from gui.wire_widget import Direction, WireWidget
+from gui.set_name_dialog import SetNameDialog
 from settings import block_width, block_height, rendering_widget_width, rendering_widget_height, width_wire, pin_width, \
     pin_height, primitive_width, primitive_height
 
@@ -82,7 +83,7 @@ class RenderingWidget(QWidget):
                 self.all_primitive_widgets[object_wid] = True
             elif isinstance(object_wid, BlockWidget):
                 self.all_block_widgets[object_wid] = True
-    def add_primitive(self, primitive: Primitive = None, pins: list[Pin] = None):
+    def add_primitive(self, primitive: Primitive = None, pins: list = None):
         if not primitive:
             primitive = Primitive(
                 self.gen_name('primitive', self.get_primitive_names()), [], (0, 100), primitive_width, primitive_height
@@ -92,7 +93,7 @@ class RenderingWidget(QWidget):
         self.all_primitive_widgets[primitive_widget] = True
         return primitive_widget
 
-    def add_block(self, block: Block = None, pins: list[Pin] = None):
+    def add_block(self, block: Block = None, pins: list = None):
         if not block:
             block = Block(
                 self.gen_name('block', self.get_block_names()), [], [], [], (0, 0), block_width, block_height
@@ -220,4 +221,6 @@ class RenderingWidget(QWidget):
             point = QPoint(event.x(), event.y())
             self.rendered_wire.set_location(point=point)
 
-
+    @pyqtSlot()
+    def save_as_block(self):
+        print("saaaave")
