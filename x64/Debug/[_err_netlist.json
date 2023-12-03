@@ -1,0 +1,14 @@
+{
+	"primit":
+	[
+		"name" : "main",
+		"type" : "primitive", 
+		"pins":
+		{
+			"pin":
+			{
+				"name": "in1"
+			}
+		}
+	}
+}

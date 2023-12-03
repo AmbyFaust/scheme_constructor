@@ -13,11 +13,11 @@ int main(int argc, char** argv){
 		std::cout << "Wrong amount of arguments passed: " << argc - 1 << " instead of 1";
 		return 1;
 	}
-	std::cout << filename << std::endl;
+	std::cout << "Checking: " << filename << std::endl;
 	const char* res_filename = "./check_result.txt";//argv[2];
 	NetList main_scheme = parse_netlist(filename);
 	std::cout << "Parse done" << std::endl;
 	recurcive_check(main_scheme, res_filename);
-	std::cout << "Check done" << std::endl;
+	std::cout << "Check done. Result in " << res_filename << std::endl;
 	return 0;
 }

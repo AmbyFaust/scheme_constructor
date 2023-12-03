@@ -19,14 +19,12 @@ NetList parse_netlist(const char* filename)
     //getting Json
 #pragma warning(suppress : 4996)
     FILE* fp = fopen(filename, "r");
-    std::cout << filename << " in parse" << std::endl;
+    //std::cout << filename << " in parse" << std::endl;
 
     char js[65536];
     rapidjson::FileReadStream is(fp, js, sizeof(js));
 
-    std::cout << filename << " in parse 2" << std::endl;
-    return NetList();
-
+    //std::cout << filename << " in parse 2" << std::endl;
     //qDebug() << js;
 
     rapidjson::Document document;

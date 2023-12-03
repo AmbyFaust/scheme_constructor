@@ -151,10 +151,12 @@ Graph recurcive_check(const NetList& scheme, const char* res_filename)
 	if (upper_hierarchy_check(upper_graph))
 	{
 		write_check_result(res_filename, "CheckerLog: upper_hierarchy_check error.");
+		std::cout << "CheckerLog: upper_hierarchy_check error." << std::endl;
 		return Graph(1);
 	}
 
 	add_inner_components(scheme, main_graph, vertices, res_filename);
 	write_check_result(res_filename, "CheckerLog: no errors found.");
+	std::cout << "CheckerLog: no errors found." << std::endl;
 	return main_graph;
 }

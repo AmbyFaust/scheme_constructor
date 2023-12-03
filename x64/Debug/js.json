@@ -1,0 +1,196 @@
+"object":
+{
+    {
+        "name": "main",
+        "type": "block",
+        "objects":
+        {
+            {
+                "name": "gate1",
+                "type": "block",
+                "link": "common_base_2port",
+                "top_left": [2, 1],
+                "width": 8,
+                "height": 4
+            },
+            {
+                "name": "gate2",
+                "type": "block",
+                "link": "common_base_2port",
+                "top_left": [12, 3],
+                "width": 8,
+                "height": 4
+            },
+            {
+                "name": "r1",
+                "type": "primitive",
+                "link": "resistor200ohm",
+                "top_left": [5, 6.5],
+                "width": 2,
+                "height": 1
+            }
+        },
+        "pins":
+        {
+            {
+                "name": "in1",
+                "top_left": [0, 4]
+            },
+            {
+                "name": "in2",
+                "top_left": [0, 6]
+            },
+            {
+                "name": "out1",
+                "top_left": [22, 4]
+            },
+            {
+                "name": "out2",
+                "top_left": [22, 6]
+            },
+            {
+                "name": "gate1.nw",
+                "top_left": [2, 2]
+            },
+            {
+                "name": "gate1.sw",
+                "top_left": [2, 4]
+            },
+            {
+                "name": "gate1.ne",
+                "top_left": [10, 2]
+            },
+            {
+                "name": "gate1.se",
+                "top_left": [10, 4]
+            },
+            {
+                "name": "gate2.nw",
+                "top_left": [12, 4]
+            },
+            {
+                "name": "gate2.sw",
+                "top_left": [12, 6]
+            },
+            {
+                "name": "gate2.ne",
+                "top_left": [20, 4]
+            },
+            {
+                "name": "gate2.se",
+                "top_left": [20, 6]
+            },
+            {
+                "name": "r1.p1",
+                "top_left": [5, 7]
+            },
+            {
+                "name": "r1.p2",
+                "top_left": [7, 7]
+            }
+        },
+        "pin_nets":
+        {
+            {
+                "name": "n1",
+                "pins": ["in1", "gate1.sw"],
+                "lines: {[0, 4], [2, 4]}
+            },
+            {
+                "name": "n2",
+                "pins": ["in2", "gate1.nw", "r1.p1"],
+                "lines: {[0, 6], [1, 6], [1, 2], [2, 2], [1, 7], [5, 7]}
+            },
+            {
+                "name": "n3",
+                "pins": ["gate1.se", "gate2.nw"],
+                "lines: {[10, 4], [12, 4]}
+            },
+            {
+                "name": "n4",
+                "pins": ["gate1.ne", "gate2.sw", "r1.p2"],
+                "lines: {[7, 7], [11, 7], [11, 6], [12, 6], [11, 2], [10, 2]}
+            },
+            {
+                "name": "n5",
+                "pins": ["gate2.ne", "out1"],
+                "lines: {[20, 4], [22, 4]}
+            },
+            {
+                "name": "n6",
+                "pins": ["gate2.se", "out2"],
+                "lines: {[20, 6], [22, 6]}
+            },
+        },
+        "top_left": [0, 0],
+        "width": 22,
+        "height": 9
+    },
+    {
+        ""name": "common_base_2port",
+        "type": "block",
+        "objects":
+        {
+            {
+                "name": "bjt1",
+                "type": "primitive",
+                "link": "bjt_type1",
+                "top_left": [29, 1.5],
+                "width": 2,
+                "height": 1
+            }
+        },
+        "pins":
+        {
+            {
+                "name": "nw",
+                "top_left: [25, 2]
+            },
+            {
+                "name": "sw",
+                "top_left: [25, 4]
+            },
+            {
+                "name": "ne",
+                "top_left: [35, 2]
+            },
+            {
+                "name": "se",
+                "top_left: [35, 4]
+            },
+            {
+                "name": "bjt1.e",
+                "top_left: [29, 2]
+            },
+            {
+                "name": "bjt1.c",
+                "top_left: [31, 2]
+            },
+            {
+                "name": "bjt1.b",
+                "top_left: [30, 2.5]
+            }
+        },
+        "pin_nets":
+        {
+            {
+                "name": "net_nw",
+                "pins": ["nw", "bjt1.e"],
+                "lines": {[25, 2], [29, 2]}
+            },
+            {
+                "name": "net_ne",
+                "pins": ["bjt1.c", "ne"],
+                "lines: {[31, 2], [35, 2]}
+            },
+            {
+                "name": "net_s",
+                "pins": ["sw", "bjt1.b", "se"],
+                "lines: {[25, 4], [30, 4], [30, 2.5], [35, 4]}
+            }
+        },
+        "top_left": [5, 6.5],
+        "width": 2,
+        "height": 1
+    }
+}
