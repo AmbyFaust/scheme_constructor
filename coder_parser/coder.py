@@ -1,7 +1,6 @@
 import json
 from schema_classes.schema_classes import BaseGraphicsModel, Pin, PinNet, Primitive, Object, Block
 
-
 def converting_to_json(dict, filename):
     """
     Coding dictionary to json-file
@@ -19,9 +18,11 @@ def code_pins(pins):
     """
     list_of_pins = []
     for pin in pins:
+        top_left = pin.get_top_left()
         pin_dictionary = {
             'name': pin.get_name(),
-            'top_left': pin.get_top_left()
+            'top': top_left[0],
+            'left': top_left[1]
         }
         list_of_pins.append(pin_dictionary)
     return list_of_pins
@@ -57,11 +58,13 @@ def code_objects(objects):
             type = 'block'
         else:
             type = 'primitive'
+        top_left = obj.get_top_left()
         obj_dictionary = {
             'type': type,
             'name': obj.get_name(),
             'link': obj.get_link(),
-            'top_left': obj.get_top_left(),
+            'top': top_left[0],
+            'left': top_left[1],
             'width': obj.get_width(),
             'height': obj.get_height(),
         }
@@ -82,10 +85,12 @@ def scheme_to_json(schema, filename):
             type = 'block'
         elif (isinstance(schema[obj], Primitive)):
             type = 'primitive'
+        top_left = schema[obj].get_top_left()
         obj_description = {
             'type': type,
             'name': schema[obj].get_name(),
-            'top_left': schema[obj].get_top_left(),
+            'top': top_left[0],
+            'left': top_left[1],
             'width': schema[obj].get_width(),
             'height': schema[obj].get_height(),
             'pins': code_pins(schema[obj].get_pins())}
@@ -95,3 +100,4 @@ def scheme_to_json(schema, filename):
         list_of_blocks.append(obj_description)
     converting_to_json(list_of_blocks, filename)
     return 0
+

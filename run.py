@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QApplication
 import sys
 import subprocess
+import json
 
 from main_window.main_window import MainWindow
 from coder_parser.parser import parse
@@ -14,6 +15,7 @@ if __name__ == '__main__':
     # res = parse("scheme_json_files/example.json")
     # print(res["main"]._link)
     # scheme_to_json(res, "scheme_json_files/coder_res.json")
+
 
 
 

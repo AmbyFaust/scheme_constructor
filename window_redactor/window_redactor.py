@@ -99,7 +99,6 @@ class WindowRedactor(QMainWindow):
         # self.hierarchy_window.get_hierarchy(primitives_widgets, block_widgets)
 
         self.schema = objects
-        print(f"window red: {self.schema}")
         self.hierarchy_window.get_hierarchy(self.schema)
 
 

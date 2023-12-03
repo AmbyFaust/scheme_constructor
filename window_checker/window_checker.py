@@ -45,7 +45,7 @@ class WindowChecker(QWidget):
 
     def run_checker(self, path: str):
         try:
-            args = "./stubs/stub_checker.exe " + self.dir_path + path
+            args = "./stubs/Checker.exe " + self.dir_path + path
             output = subprocess.run(args, capture_output=True)
             print(f"out: {output.stdout}, \nerror: {output.stderr}")
             if output.returncode != 0:
