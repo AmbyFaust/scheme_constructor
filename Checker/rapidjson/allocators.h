@@ -664,7 +664,7 @@ public:
     StdAllocator(const BaseAllocator& baseAllocator) RAPIDJSON_NOEXCEPT :
         allocator_type(),
         baseAllocator_(baseAllocator)
-    { }43
+    { }
 
     ~StdAllocator() RAPIDJSON_NOEXCEPT
     { }

@@ -1,9 +1,11 @@
+#include "parse.h"
 #include "netlist.h"
 #include "rapidjson/document.h"
 #include "rapidjson/error/en.h"
 #include "rapidjson/filereadstream.h"
 
-NetList parse_netlist()
+
+NetList parse_netlist(const char* filename)
 {
     std::string name("");
 
@@ -15,11 +17,17 @@ NetList parse_netlist()
     std::vector<NetList> blockList{};
 
     //getting Json
-    FILE* fp = fopen("C:/QT Projects/check/checker/type_err.txt", "r");
+#pragma warning(suppress : 4996)
+    FILE* fp = fopen(filename, "r");
+    std::cout << filename << " in parse" << std::endl;
+
     char js[65536];
     rapidjson::FileReadStream is(fp, js, sizeof(js));
 
-    qDebug() << js;
+    std::cout << filename << " in parse 2" << std::endl;
+    return NetList();
+
+    //qDebug() << js;
 
     rapidjson::Document document;
 
@@ -30,8 +38,8 @@ NetList parse_netlist()
     }
     else                                                                                // if not
     {                                                                                   // showing error
-        qDebug() << document.GetErrorOffset();                                          // & it's place
-        qDebug() << GetParseError_En(document.GetParseError());
+        //qDebug() << document.GetErrorOffset();                                          // & it's place
+        //qDebug() << GetParseError_En(document.GetParseError());
         fclose(fp);
     }
 
@@ -81,16 +89,17 @@ NetList parse_netlist()
     return block;
 }
 
-Primitive parse_primitive()
+Primitive parse_primitive(const char* filename)
 {
     std::string name("");
     std::vector<std::string> pins{};
 
-    FILE* fp = fopen("C:/QT Projects/check/checker/netlist.json", "r");         // connecting json
+#pragma warning(suppress : 4996)
+    FILE* fp = fopen(filename, "r");         // connecting json
     char js[65536];
     rapidjson::FileReadStream is(fp, js, sizeof(js));                           //stream file
 
-    qDebug() << js;
+    //qDebug() << js;
 
     rapidjson::Document document;                                               // connecting doc
 
@@ -101,8 +110,8 @@ Primitive parse_primitive()
     }
     else                                                                        // or not
     {                                                                           // showing where is err
-        qDebug() << document.GetErrorOffset();                                  // what err it is
-        qDebug() << GetParseError_En(document.GetParseError());
+        //qDebug() << document.GetErrorOffset();                                  // what err it is
+        //qDebug() << GetParseError_En(document.GetParseError());
         fclose(fp);
     }                                                                           // closing file
 

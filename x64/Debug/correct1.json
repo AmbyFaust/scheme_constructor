@@ -1,0 +1,38 @@
+{
+	"primit":
+	{
+		name : "main",
+		"type" : "primitive", 
+		"pins":
+		{
+			"pin1":
+			{
+				"name": "in1"
+			}
+		}
+	},
+	"blck":
+	{
+		"type" : "block",
+		"name" : "block1",
+		"pins":
+		{
+			"pin1":
+			{
+				"name": "p1"
+			},
+			"pin2":
+			{
+				"name": "p2"
+			}
+		},
+		"pin_nets":
+		{
+			"0":
+			{
+				"name": "n1",
+				"pins": "p1, p2"
+			}
+		}
+	}
+}

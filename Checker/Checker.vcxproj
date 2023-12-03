@@ -136,6 +136,7 @@
     <ClCompile Include="check_tools.cpp" />
     <ClCompile Include="graph.cpp" />
     <ClCompile Include="netlist.cpp" />
+    <ClCompile Include="parse.cpp" />
     <ClCompile Include="unfolding_graph.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -143,6 +144,7 @@
     <ClInclude Include="check_tools.h" />
     <ClInclude Include="graph.h" />
     <ClInclude Include="netlist.h" />
+    <ClInclude Include="parse.h" />
     <ClInclude Include="parse_tools.h" />
     <ClInclude Include="unfolding_graph.h" />
   </ItemGroup>

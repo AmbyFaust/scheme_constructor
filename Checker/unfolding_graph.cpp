@@ -54,7 +54,7 @@ std::unordered_map<std::string, std::pair<size_t, size_t>> pins_to_Vertices(cons
 }
 
 void add_inner_components(const NetList& scheme, Graph& main_graph, 
-	std::unordered_map<std::string, std::pair<size_t, size_t>>& vertices)
+	std::unordered_map<std::string, std::pair<size_t, size_t>>& vertices, const char* res_filename)
 /* Функция вызывается в Graph recurcive_check(const NetList& scheme);
 * Добавление в граф внутренних компонент нетлиста 
 */
@@ -86,7 +86,7 @@ void add_inner_components(const NetList& scheme, Graph& main_graph,
 		else if (object->type() == netlist) {
 			NetList* subScheme = dynamic_cast<NetList*>(object);
 			if (subScheme) {
-				Graph add_graph = recurcive_check(*subScheme);
+				Graph add_graph = recurcive_check(*subScheme, res_filename);
 				/// добавить проверку на Graph(1) прервать работу,выдать ошибку
 				/*if (add_graph == Graph(1))
 				{
@@ -120,7 +120,7 @@ void add_inner_components(const NetList& scheme, Graph& main_graph,
 	}
 }
 
-Graph recurcive_check(const NetList& scheme)
+Graph recurcive_check(const NetList& scheme, const char* res_filename)
 {
 	std::unordered_map<std::string, std::pair<size_t, size_t>> vertices;
 	vertices = pins_to_Vertices(scheme.get_pins());
@@ -150,11 +150,11 @@ Graph recurcive_check(const NetList& scheme)
 
 	if (upper_hierarchy_check(upper_graph))
 	{
-		write_check_result("abc.txt", "upper_hierarchy_check error");
+		write_check_result(res_filename, "CheckerLog: upper_hierarchy_check error.");
 		return Graph(1);
 	}
 
-	add_inner_components(scheme, main_graph, vertices);
-	
+	add_inner_components(scheme, main_graph, vertices, res_filename);
+	write_check_result(res_filename, "CheckerLog: no errors found.");
 	return main_graph;
 }
