@@ -1,3 +1,4 @@
+from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QMenu, QMainWindow, QAction, QMenuBar, QWidget
 from PyQt5.QtWidgets import QTreeView, QVBoxLayout
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QColor
@@ -19,10 +20,14 @@ class StandardItem(QStandardItem):
         self.setForeground(colors[self.type])
         self.setText(self.name)
 
+
 class HierarchyWindow(QMainWindow):
     """
     Window for present hierarchy of primitives and blocks
     """
+
+    visualize_item = pyqtSignal(str)
+
     def __init__(self):
         super(HierarchyWindow, self).__init__()
         self.setWindowTitle('Hierarchy Window')
@@ -44,6 +49,7 @@ class HierarchyWindow(QMainWindow):
 
         self.setCentralWidget(self.tree)
 
+
     def openMenu(self, position):
         mdlIdx = self.tree.indexAt(position)
         right_click_menu = QMenu()
@@ -52,6 +58,7 @@ class HierarchyWindow(QMainWindow):
         right_click_menu.exec_(self.sender().viewport().mapToGlobal(position))
 
     def visualize(self, stand_item: StandardItem):
+        self.visualize_item.emit(stand_item.name)
         print(stand_item.objects, stand_item.type)
 
     def get_hierarchy(self, objects: dict):

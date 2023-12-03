@@ -5,6 +5,7 @@ from gui.rendering_window import RenderingWindow
 from gui.rendering_widget import RenderingWidget
 from hierarchy_window import hierarchy_window
 from files_window.files_window import FilesWindow
+from schema_classes.schema_classes import Block, Primitive
 
 
 class WindowRedactor(QMainWindow):
@@ -20,6 +21,8 @@ class WindowRedactor(QMainWindow):
 
         self.dir_path = dir_path
         self.schema = None
+
+        self.schema_uploader = None
 
         self.work_zone = None
         self.primitive_panel = None
@@ -63,6 +66,8 @@ class WindowRedactor(QMainWindow):
         # lay = QtWidgets.QVBoxLayout(self.hierarchy_window)
         # lay.addWidget(QtWidgets.QMainWindow())
 
+        self.hierarchy_window.visualize_item.connect(self.upload_schema_object)
+
     def __createMenuBar(self):
         """
         creating menu bar for working with files and hierarchy window
@@ -85,11 +90,11 @@ class WindowRedactor(QMainWindow):
         # self.menuBar.addMenu(hierarchy)
         # hierarchy.addAction('reload', self.clicked_reload_hierarchy)
 
-        self.files_window.login_data[dict].connect(self.clicked_reload_hierarchy)
+        self.files_window.login_data[dict].connect(self.clicked_reload)
 
-    def clicked_reload_hierarchy(self, objects: dict):
+    def clicked_reload(self, objects: dict):
         """
-        reload hierarchy after update
+        reload after update
         :return:
         """
         # action = self.sender()
@@ -100,8 +105,8 @@ class WindowRedactor(QMainWindow):
 
         self.schema = objects
         print(f"window red: {self.schema}")
+        self.upload_schema_object('main')
         self.hierarchy_window.get_hierarchy(self.schema)
-
 
     @QtCore.pyqtSlot()
     def clicked_clear(self):
@@ -145,3 +150,11 @@ class WindowRedactor(QMainWindow):
         """
         action = self.sender()
         print("Pressed button", action.text())
+
+    @QtCore.pyqtSlot(str)
+    def upload_schema_object(self, key_name):
+        if key_name in self.schema:
+            if isinstance(self.schema[key_name], Block):
+                self.work_zone.rendering_widget.parse_block(self.schema[key_name])
+            if isinstance(self.schema[key_name], Primitive):
+                self.work_zone.rendering_widget.add_primitive(self.schema[key_name])

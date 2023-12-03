@@ -11,7 +11,6 @@ if __name__ == '__main__':
     w = MainWindow()
     w.show()
     sys.exit(app.exec_())
-    # res = parse("scheme_json_files/example.json")
     # print(res["main"]._link)
     # scheme_to_json(res, "scheme_json_files/coder_res.json")
 

@@ -12,6 +12,7 @@ from gui.primitive_widget import PrimitiveWidget
 from gui.wire_widget import Direction, WireWidget
 from settings import block_width, block_height, rendering_widget_width, rendering_widget_height, width_wire, pin_width, \
     pin_height, primitive_width, primitive_height
+from window_redactor.additonal_functions import is_point_on_rectangle_boundary
 
 
 class RenderingWidget(QWidget):
@@ -64,10 +65,11 @@ class RenderingWidget(QWidget):
         while name in existed_names:
             name = name + str(random.randrange(10))
         return name
+
     def add_external_pin(self):
         self.add_pin(self)
 
-    def add_primitive(self, primitive: Primitive = None, pins: list[Pin] = None):
+    def add_primitive(self, primitive: Primitive = None, pins: [Pin] = None):
         if not primitive:
             primitive = Primitive(
                 self.gen_name('primitive', self.get_primitive_names()), [], (0, 100), primitive_width, primitive_height
@@ -77,7 +79,7 @@ class RenderingWidget(QWidget):
         self.all_primitive_widgets[primitive_widget] = True
         return primitive_widget
 
-    def add_block(self, block: Block = None, pins: list[Pin] = None):
+    def add_block(self, block: Block = None, pins: [Pin] = None):
         if not block:
             block = Block(
                 self.gen_name('block', self.get_block_names()), [], [], [], (0, 0), block_width, block_height
@@ -126,6 +128,48 @@ class RenderingWidget(QWidget):
         self.all_pin_widgets[pin_widget] = True
         return pin_widget
 
+    def parse_block(self, block: Block):
+        for object_ in block.get_objects():
+            if object_.get_object_type() == 'primitive':
+                prim_name = object_.get_name()
+                prim_top_left = object_.get_top_left()
+                prim_width = object_.get_width()
+                prim_height = object_.get_height()
+                prim_link = object_.get_link()
+                prim_pins = []
+                for pin in block.get_pins():
+                    prim_pin_top, prim_pin_left = pin.get_top_left()
+                    if is_point_on_rectangle_boundary(prim_top_left[1], prim_top_left[0], prim_width, prim_height,
+                                                      prim_pin_left, prim_pin_top):
+                        prim_pins.append(pin)
+                        block.get_pins().remove(pin)
+
+                primitive = Primitive(prim_name, prim_pins, prim_top_left, prim_width, prim_height, prim_link)
+                self.add_primitive(primitive, prim_pins)
+
+            if object_.get_object_type() == 'block':
+                b_name = object_.get_name()
+                print(b_name)
+                b_top_left = object_.get_top_left()
+                b_width = object_.get_width()
+                b_height = object_.get_height()
+                b_link = object_.get_link()
+                b_pins = []
+                for pin in block.get_pins():
+                    b_pin_top, b_pin_left = pin.get_top_left()
+                    print(b_pin_top, b_pin_left, b_top_left[1], b_top_left[0])
+                    if is_point_on_rectangle_boundary(b_top_left[1], b_top_left[0], b_width, b_height,
+                                                      b_pin_left, b_pin_top):
+                        b_pins.append(pin)
+                        block.get_pins().remove(pin)
+
+                block = Block(b_name, b_pins, [], [], b_top_left, b_width, b_height, b_link)
+                self.add_block(block, b_pins)
+
+    def parse_primitive(self, primitive: Primitive):
+        prim_pins = primitive.get_pins()
+        self.add_primitive(primitive, prim_pins)
+
     def add_wire(self, start: QPoint, end: QPoint, direction: Direction,
                  connected_pins: list, connected_crossroads: list):
         wire_widget = WireWidget(self, start, end, direction, connected_pins, connected_crossroads)
@@ -158,7 +202,6 @@ class RenderingWidget(QWidget):
                                             event.modifiers())
                     pin_widget.mousePressEvent(new_event)
                     return
-
 
             self.rendered_wire.drawing = False
             delta = QPoint()
