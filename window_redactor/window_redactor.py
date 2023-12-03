@@ -6,6 +6,7 @@ from gui.rendering_widget import RenderingWidget
 from hierarchy_window import hierarchy_window
 from files_window.files_window import FilesWindow
 
+
 class WindowRedactor(QMainWindow):
     """
     Window for working with Redactor
@@ -53,14 +54,14 @@ class WindowRedactor(QMainWindow):
         for c in range(3):
             lay.setColumnStretch(c, 1)
 
-        lay = QtWidgets.QVBoxLayout(self.work_zone)
-        lay.addWidget(QtWidgets.QWidget())
-
-        lay = QtWidgets.QVBoxLayout(self.panel_primitive)
-        lay.addWidget(QtWidgets.QListWidget())
-
-        lay = QtWidgets.QVBoxLayout(self.hierarchy_window)
-        lay.addWidget(QtWidgets.QMainWindow())
+        # lay = QtWidgets.QVBoxLayout(self.work_zone)
+        # lay.addWidget(QtWidgets.QWidget())
+        #
+        # lay = QtWidgets.QVBoxLayout(self.panel_primitive)
+        # lay.addWidget(QtWidgets.QListWidget())
+        #
+        # lay = QtWidgets.QVBoxLayout(self.hierarchy_window)
+        # lay.addWidget(QtWidgets.QMainWindow())
 
     def __createMenuBar(self):
         """

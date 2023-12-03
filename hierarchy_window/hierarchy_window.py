@@ -15,7 +15,7 @@ class StandardItem(QStandardItem):
 
         colors = {"Block": QColor(255, 0, 0), "Primitive": QColor(0, 0, 255)}
 
-        #self.setEditable(False)
+        self.setEditable(False)
         self.setForeground(colors[self.type])
         self.setText(self.name)
 
@@ -26,7 +26,7 @@ class HierarchyWindow(QMainWindow):
     def __init__(self):
         super(HierarchyWindow, self).__init__()
         self.setWindowTitle('Hierarchy Window')
-        self.setMinimumWidth(600)
+        self.setMinimumWidth(300)
         self.setMinimumHeight(500)
         self.objects = {}
 
@@ -38,7 +38,7 @@ class HierarchyWindow(QMainWindow):
         self.tree.customContextMenuRequested.connect(self.openMenu)
         self.tree.setModel(self.model)
 
-        self.tree.setHeaderHidden(True)
+        self.tree.setHeaderHidden(False)
         self.tree.header().setDefaultSectionSize(180)
         self.tree.expandAll()
 
@@ -52,7 +52,7 @@ class HierarchyWindow(QMainWindow):
         right_click_menu.exec_(self.sender().viewport().mapToGlobal(position))
 
     def visualize(self, stand_item: StandardItem):
-        print(stand_item.objects)
+        print(stand_item.objects, stand_item.type)
 
     def get_hierarchy(self, objects: dict):
         """

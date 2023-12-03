@@ -1,14 +1,15 @@
 import json
+from schema_classes.schema_classes import BaseGraphicsModel, Pin, PinNet, Primitive, Object, Block
 
-from schema_classes.schema_classes import Pin, PinNet, Primitive, Block, Object
 
-def converting_to_json(dict):
+def converting_to_json(dict, filename):
     """
     Coding dictionary to json-file
     :param dict: dictionary with entities
     return json
     """
-    return json.dumps(dict)
+    with open(filename, 'w') as outfile:
+        json.dump(dict, outfile)
 
 def code_pins(pins):
     """
@@ -52,19 +53,18 @@ def code_objects(objects):
     """
     list_of_objects = []
     for obj in objects:
-        link = obj.get_link()
-        type = obj.get_type()
+        if (isinstance(obj, Block)):
+            type = 'block'
+        else:
+            type = 'primitive'
         obj_dictionary = {
             'type': type,
             'name': obj.get_name(),
+            'link': obj.get_link(),
             'top_left': obj.get_top_left(),
             'width': obj.get_width(),
-            'height': obj.get_height()
+            'height': obj.get_height(),
         }
-        if (type == 'block'):
-            obj_dictionary['pins'] = code_pins(obj.get_pins())
-        if (link != ''):
-            obj_dictionary['link'] = link
         list_of_objects.append(obj_dictionary)
     return list_of_objects
 
@@ -72,28 +72,26 @@ def code_objects(objects):
 def scheme_to_json(schema, filename):
     """
     Coding scheme to json-file according to special format
-    :param scheme: dictionary with objects
+    :param scheme: dictionary with {name: object}
     :param filename: name of json file to save
     :return:
     """
-    list_of_blocks = []  # лист в который будут складываться блоки в формате json
-    for obj in schema:
-        type = obj.get_type()
-        link = obj.get_link()
+    list_of_blocks = []
+    for obj in schema.keys():
+        if (isinstance(schema[obj], Block)):
+            type = 'block'
+        elif (isinstance(schema[obj], Primitive)):
+            type = 'primitive'
         obj_description = {
             'type': type,
-            'name': obj.get_name(),
-            'top_left': obj.get_top_left(),
-            'width': obj.get_width(),
-            'height': obj.get_height()}
-        if (type == 'block' & link == ''):
-                obj_description['objects'] = code_objects(obj.get_objects())
-                obj_description['pins'] = code_pins(obj.get_pins())
-                obj_description['pin_nets'] = code_pin_nets(obj.get_pin_nets())
-        elif((type == 'block' & link != '') | (type == 'primitive' & link != '')):
-            obj_description['link'] = link
-        list_of_blocks.append(converting_to_json(obj_description))
-
-    f = open(filename, 'w')
-    f.write(str(list_of_blocks))
-    f.close()
+            'name': schema[obj].get_name(),
+            'top_left': schema[obj].get_top_left(),
+            'width': schema[obj].get_width(),
+            'height': schema[obj].get_height(),
+            'pins': code_pins(schema[obj].get_pins())}
+        if (type == 'block'):
+            obj_description['objects'] = code_objects(schema[obj].get_objects())
+            obj_description['pin_nets'] = code_pin_nets(schema[obj].get_pin_nets())
+        list_of_blocks.append(obj_description)
+    converting_to_json(list_of_blocks, filename)
+    return 0

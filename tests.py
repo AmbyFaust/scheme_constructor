@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QApplication
 
 from main_window.main_window import MainWindow
 import random
-from core.schema_classes import Primitive, Block
+from schema_classes.schema_classes import Primitive, Block
 from settings import block_width, block_height
 from hierarchy_window.hierarchy_window import HierarchyWindow
 
