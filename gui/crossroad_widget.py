@@ -146,8 +146,8 @@ class CrossroadWidget(QWidget):
         wire2.delete()
 
         self.connected_wires.clear()
-        if self in self.parent().crossroad_widgets:
-            self.parent().crossroad_widgets.pop(self)
+        if self in self.parent().all_crossroad_widgets:
+            self.parent().all_crossroad_widgets.pop(self)
         self.deleteLater()
 
     def cascade_delete(self):
@@ -168,8 +168,8 @@ class CrossroadWidget(QWidget):
             return
 
         self.connected_wires.clear()
-        if self in self.parent().crossroad_widgets:
-            self.parent().crossroad_widgets.pop(self)
+        if self in self.parent().all_crossroad_widgets:
+            self.parent().all_crossroad_widgets.pop(self)
         self.deleteLater()
 
     def connect_wire(self, event):
@@ -191,9 +191,7 @@ class CrossroadWidget(QWidget):
             wire.connected_crossroads.append(self)
             self.parent().rendered_wire = None
 
-
     def mousePressEvent(self, event):
-        print(len(self.connected_wires))
         if self.parent().rendered_wire:
             self.connect_wire(event)
             return

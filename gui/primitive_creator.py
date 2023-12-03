@@ -20,6 +20,7 @@ class PrimitiveCreator(QMainWindow):
 class PrimitiveRenderingWidget(RenderingWidget):
     def __init__(self):
         super().__init__()
+        self.add_pin_action.setVisible(False)
         self.save_button = QPushButton(self, text="Save Primitive")
         self.save_button.setStyleSheet('QPushButton {background-color: #FFFFFF;}')
         self.save_button.move(10, 350)

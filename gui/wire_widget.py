@@ -187,8 +187,8 @@ class WireWidget(QWidget):
             crossroads_widget.cascade_delete()
         self.connected_crossroads.clear()
 
-        if self in self.parent().wire_widgets:
-            self.parent().wire_widgets.pop(self)
+        if self in self.parent().all_wire_widgets:
+            self.parent().all_wire_widgets.pop(self)
         self.deleteLater()
 
     def clear(self):

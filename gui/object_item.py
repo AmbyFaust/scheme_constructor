@@ -6,7 +6,7 @@ from PyQt5.QtGui import QIcon
 from gui.pin_widget import PinWidget
 from gui.primitive_widget import PrimitiveWidget
 from gui.block_widget import BlockWidget
-from core.schema_classes import Primitive, Block
+from schema_classes.schema_classes import Primitive, Block
 from settings import pin_width, pin_height, primitive_width, primitive_height
                                             
 from copy import deepcopy
@@ -22,7 +22,7 @@ class ObjectItem(QListWidgetItem):
 
     def setStoredObject(self, obj: QWidget):
         self.__data = _ObjectDublicator.clone(obj)
-        padding = min(pin_width, pin_height)
+        padding = min(pin_width, pin_height, 0)
         self.setIcon(QIcon(self.__data.grab(QRect(QPoint(-padding//2,-padding//2), 
                                             QSize(self.__data.width() + padding, self.__data.height() + padding)))))
 
@@ -57,7 +57,7 @@ class _ObjectDublicator:
             return cloned
 
         for pin in obj.pin_widgets:
-            pin_widget = PinWidget(cloned, cloned)
+            pin_widget = PinWidget(cloned, pin.pin, cloned)
             pin_widget.move(pin.pos() - obj.pos())
             cloned.pin_widgets.append(pin_widget)
             pin_widget.show()

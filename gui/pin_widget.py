@@ -9,26 +9,36 @@ from settings import pin_width, pin_height, width_wire
 
 
 class PossiblePoints:
-    def __init__(self, connected_widget, offset):
+    def __init__(self, connected_widget, rendering_widget, offset):
         self.top = []
         self.bottom = []
         self.right = []
         self.left = []
         self.all = []
 
-        for dx in range(1, connected_widget.width() - 1):
-            self.top.append(QPoint(dx, 0) - offset)
-            self.bottom.append(QPoint(dx, connected_widget.height()) - offset)
-        for dy in range(1, connected_widget.height() - 1):
-            self.left.append(QPoint(0, dy) - offset)
-            self.right.append(QPoint(connected_widget.width(), dy) - offset)
+        if connected_widget == rendering_widget:
+            delta = pin_width // 2
+            for dx in range(delta, connected_widget.width() - delta):
+                self.top.append(QPoint(dx, delta) - offset)
+                self.bottom.append(QPoint(dx, connected_widget.height() - delta) - offset)
+            for dy in range(delta, connected_widget.height() - delta):
+                self.left.append(QPoint(delta, dy) - offset)
+                self.right.append(QPoint(connected_widget.width() - delta, dy) - offset)
+        else:
+            for dx in range(1, connected_widget.width() - 1):
+                self.top.append(QPoint(dx, 0) - offset)
+                self.bottom.append(QPoint(dx, connected_widget.height()) - offset)
+            for dy in range(1, connected_widget.height() - 1):
+                self.left.append(QPoint(0, dy) - offset)
+                self.right.append(QPoint(connected_widget.width(), dy) - offset)
         self.all = self.top + self.bottom + self.right + self.left
 
 
 class PinWidget(QWidget):
-    def __init__(self, parent, connected_widget):
+    def __init__(self, parent, pin, connected_widget):
         super(PinWidget, self).__init__(parent)
         self.setAttribute(Qt.WA_StyledBackground, True)
+        self.pin = pin
         self.border = Qt.NoPen
         self.color = QColor()
 
@@ -47,16 +57,14 @@ class PinWidget(QWidget):
         )
         self.pin_possible_move_points = PossiblePoints(
             self.connected_widget,
+            self.parent(),
             self.offset
         )
 
         self.__create_actions()
         self.unlock()
 
-        self.move(
-            connected_widget.x() + connected_widget.width() // 2 - self.width() // 2,
-            connected_widget.y() + connected_widget.height() - self.height() // 2
-        )
+        self.move(*pin.get_top_left()[::-1])
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.show_context_menu)
         self.setMouseTracking(True)
@@ -96,7 +104,10 @@ class PinWidget(QWidget):
         self.border = QPen(Qt.black)
         self.border.setWidth(1)
         self.color = QColor(0, 255, 0)
-        self.connected_widget.lock()
+        try:
+            self.connected_widget.lock()
+        except Exception:
+            pass
         self.update()
 
     def unlock(self):
@@ -110,15 +121,21 @@ class PinWidget(QWidget):
 
     def delete(self):
         self.connected_widget.pin_widgets.remove(self)
-        self.connected_widget.unlock()
+        try:
+            self.connected_widget.unlock()
+        except Exception:
+            pass
         self.connected_widget = None
         if self.wire:
             self.wire.delete()
-        self.parent().pin_widgets.pop(self)
+        self.parent().all_pin_widgets.pop(self)
         self.deleteLater()
 
     def add_wire(self):
         pos_in_conn_widget = self.pos() - self.connected_widget.pos()
+        if self.parent() == self.connected_widget:
+            pos_in_conn_widget = self.pos()
+
         direction = Direction.vertical
         delta = QPoint(width_wire // 2 + 1, 0)
         if (pos_in_conn_widget in self.pin_possible_move_points.left) \
@@ -152,6 +169,8 @@ class PinWidget(QWidget):
             wire = self.parent().rendered_wire
             if wire:
                 pos_in_conn_widget = self.pos() - self.connected_widget.pos()
+                if self.parent() == self.connected_widget:
+                    pos_in_conn_widget = self.pos()
                 pin_direction = Direction.vertical
                 delta = QPoint(width_wire // 2 + 1, 0)
                 if (pos_in_conn_widget in self.pin_possible_move_points.left) \
@@ -180,12 +199,20 @@ class PinWidget(QWidget):
         if self.dragging and not self.wire:
             new_pos = self.pin_possible_move_points.all[0]
             min_distance = math.inf
-            for point in self.pin_possible_move_points.all:
-                distance = self.calc_distance(self.connected_widget.pos() + point, self.pos() + event.pos() - self.offset)
-                if distance < min_distance:
-                    new_pos = point
-                    min_distance = distance
-            self.move(self.connected_widget.pos() + new_pos)
+            if self.parent() == self.connected_widget:
+                for point in self.pin_possible_move_points.all:
+                    distance = self.calc_distance(point, self.pos() + event.pos() - self.offset)
+                    if distance < min_distance:
+                        new_pos = point
+                        min_distance = distance
+                self.move(new_pos)
+            else:
+                for point in self.pin_possible_move_points.all:
+                    distance = self.calc_distance(self.connected_widget.pos() + point, self.pos() + event.pos() - self.offset)
+                    if distance < min_distance:
+                        new_pos = point
+                        min_distance = distance
+                self.move(self.connected_widget.pos() + new_pos)
         else:
             new_event = QMouseEvent(event.type(),
                                     event.pos() + self.pos(),
