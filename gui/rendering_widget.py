@@ -1,6 +1,6 @@
 import random
 
-from PyQt5.QtCore import Qt, QPoint
+from PyQt5.QtCore import Qt, QPoint, pyqtSlot
 from PyQt5.QtGui import QCursor, QMouseEvent
 from PyQt5.QtWidgets import QWidget, QMenu, QAction
 
@@ -67,6 +67,21 @@ class RenderingWidget(QWidget):
     def add_external_pin(self):
         self.add_pin(self)
 
+    @pyqtSlot(object)
+    def add_object_from_panel(self, object_wid):
+        if object_wid:
+            object_wid.setParent(self)
+            object_wid.move(50, 50)
+            object_wid.show()
+            for pin in object_wid.pin_widgets:
+                pin.setParent(self)
+                pin.move(object_wid.pos() + pin.pos() + QPoint(object_wid.width(), 0))
+                pin.show()
+                self.all_pin_widgets[pin] = True
+            if isinstance(object_wid, PrimitiveWidget):
+                self.all_primitive_widgets[object_wid] = True
+            elif isinstance(object_wid, BlockWidget):
+                self.all_block_widgets[object_wid] = True
     def add_primitive(self, primitive: Primitive = None, pins: list[Pin] = None):
         if not primitive:
             primitive = Primitive(
@@ -204,4 +219,5 @@ class RenderingWidget(QWidget):
                 )
             point = QPoint(event.x(), event.y())
             self.rendered_wire.set_location(point=point)
+
 

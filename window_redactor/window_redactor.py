@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QMenu, QMainWindow, QMenuBar
 
 from gui.rendering_window import RenderingWindow
 from gui.rendering_widget import RenderingWidget
+from gui.object_panel import ObjectPanel
 from hierarchy_window import hierarchy_window
 from files_window.files_window import FilesWindow
 
@@ -22,7 +23,7 @@ class WindowRedactor(QMainWindow):
         self.schema = None
 
         self.work_zone = None
-        self.primitive_panel = None
+        self.object_panel = None
         self.hierarchy_window = None
         self.files_window = FilesWindow(self.dir_path)
 
@@ -40,19 +41,22 @@ class WindowRedactor(QMainWindow):
         self.setCentralWidget(central_widget)
 
         self.work_zone = RenderingWindow()
-        self.panel_primitive = QtWidgets.QWidget()
+        self.object_panel = ObjectPanel()
         self.hierarchy_window = hierarchy_window.HierarchyWindow()
 
         lay = QtWidgets.QGridLayout(central_widget)
 
         for w, (r, c) in zip(
-                (self.work_zone, self.primitive_panel, self.hierarchy_window),
+                (self.work_zone, self.object_panel, self.hierarchy_window),
                 ((0, 0), (0, 1), (0, 2)),
         ):
             lay.addWidget(w, r, c)
 
         for c in range(3):
             lay.setColumnStretch(c, 1)
+
+        self.object_panel.objAddRequested.connect(self.work_zone.rendering_widget.add_object_from_panel)
+        self.object_panel.show()
 
         # lay = QtWidgets.QVBoxLayout(self.work_zone)
         # lay.addWidget(QtWidgets.QWidget())
