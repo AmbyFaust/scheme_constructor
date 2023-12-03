@@ -2,7 +2,7 @@ import re
 
 from PyQt5.QtCore import Qt, QPoint
 from PyQt5.QtGui import QCursor, QMouseEvent
-from PyQt5.QtWidgets import QWidget, QAction, QMenu, QLabel, QVBoxLayout, QDialog
+from PyQt5.QtWidgets import QWidget, QAction, QMenu, QLabel, QVBoxLayout, QDialog, QMessageBox
 
 from schema_classes.schema_classes import Block
 from gui.pin_widget import PinWidget
@@ -89,6 +89,11 @@ class BlockWidget(QWidget):
                     re.match("[A-Za-z0-9]+$", set_name_dialog.name_edit.text()):
                 self.block.set_name(set_name_dialog.name_edit.text())
                 self.name_label.setText(self.block.get_name())
+            else:
+                msg = QMessageBox()
+                msg.setWindowTitle("Error")
+                msg.setText("Incorrect Block name")
+                msg.exec()
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton and not self.parent().rendered_wire:

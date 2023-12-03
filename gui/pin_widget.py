@@ -3,7 +3,7 @@ import re
 
 from PyQt5.QtCore import Qt, QPoint
 from PyQt5.QtGui import QPainter, QColor, QCursor, QPen, QMouseEvent
-from PyQt5.QtWidgets import QWidget, QAction, QMenu, QDialog, QLabel, QVBoxLayout
+from PyQt5.QtWidgets import QWidget, QAction, QMenu, QDialog, QLabel, QVBoxLayout, QMessageBox
 
 from gui.wire_widget import WireWidget, Direction
 from gui.set_name_dialog import SetNameDialog
@@ -177,6 +177,11 @@ class PinWidget(QWidget):
                 print('name changed')
                 self.pin.set_name(set_name_dialog.name_edit.text())
                 self.name_label.setText(self.pin.get_name())
+            else:
+                msg = QMessageBox()
+                msg.setWindowTitle("Error")
+                msg.setText("Incorrect Pin name")
+                msg.exec()
 
     def set_pin_connection(self, pin_connection):
         self.pin_connection = pin_connection

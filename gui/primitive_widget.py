@@ -2,7 +2,7 @@ import re
 
 from PyQt5.QtCore import QPoint, Qt
 from PyQt5.QtGui import QCursor, QMouseEvent
-from PyQt5.QtWidgets import QWidget, QMenu, QAction, QVBoxLayout, QLabel, QDialog
+from PyQt5.QtWidgets import QWidget, QMenu, QAction, QVBoxLayout, QLabel, QDialog, QMessageBox
 
 from schema_classes.schema_classes import Primitive
 from gui.pin_widget import PinWidget
@@ -93,6 +93,7 @@ class PrimitiveWidget(QWidget):
         if set_name_dialog.exec_() == QDialog.Accepted:
             if set_name_dialog.name_edit.text() not in self.parent().get_primitive_names() and\
                     re.match("[A-Za-z0-9]+$", set_name_dialog.name_edit.text()):
+
                 self.primitive.set_name(set_name_dialog.name_edit.text())
                 self.name_label.setText(self.primitive.get_name())
 
@@ -100,6 +101,11 @@ class PrimitiveWidget(QWidget):
                     pin_widg.name_label.setText(f"{self.primitive.get_name()}.{pin_widg.pin.get_name().split('.')[1]}")
                     pin_widg.pin.set_name(f"{self.primitive.get_name()}.{pin_widg.pin.get_name().split('.')[1]}")
                     print(pin_widg.pin.get_name())
+            else:
+                msg = QMessageBox()
+                msg.setWindowTitle("Error")
+                msg.setText("Incorrect Primitive name")
+                msg.exec()
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton and not self.parent().rendered_wire:
