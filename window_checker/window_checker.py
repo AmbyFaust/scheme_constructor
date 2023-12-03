@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QFileSystemModel, QTreeView, QVBoxLayout, QWidget, QMenu
+from PyQt5.QtWidgets import QFileSystemModel, QTreeView, QVBoxLayout, QWidget, QMenu, QMessageBox
 from PyQt5.QtCore import Qt
 from pathlib import Path
 from functools import partial
@@ -48,6 +48,15 @@ class WindowChecker(QWidget):
             args = "./stubs/Checker.exe " + self.dir_path + path
             output = subprocess.run(args, capture_output=True)
             print(f"out: {output.stdout}, \nerror: {output.stderr}")
+
+            msg = QMessageBox()
+            msg.setWindowTitle("Result")
+            if output.stderr == b'':
+                msg.setText(f"file name: {path},\nChecker result: OK")
+            else:
+                msg.setText(f"file name: {path}\n,Checker result: WRONG,\nError: {output.stderr}")
+            msg.exec()
+
             if output.returncode != 0:
                 raise Exception(output.stderr)
         except Exception as exc:
