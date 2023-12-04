@@ -90,9 +90,10 @@ def parse_pin_nets(pin_nets_dict) -> List[PinNet]:
 
 
 def parse_top_left(top_left_dict) -> tuple:
-    tl = top_left_dict['top_left']
-    if len(tl) == 2 and is_number_valid(tl[0]) and is_number_valid(tl[1]):
-        return tuple([tl[0], tl[1]])
+    t = top_left_dict['top']
+    l = top_left_dict['left']
+    if is_number_valid(t) and is_number_valid(l):
+        return tuple([t, l])
     raise RuntimeError(f'Top or left can not be parsed.')
 
 

@@ -15,27 +15,30 @@ class TestJsonParsing(unittest.TestCase):
             {
                 "type": "primitive",
                 "name": "valid_primitive",
-                "top_left": [0, 0],
+                "top": 0,
+                "left": 0,
                 "width": 10,
                 "height": 20,
-                "pins": [{"name": "pin1", "top_left": [1, 1]}]
+                "pins": [{"name": "pin1", "top": 1, "left": 1}]
             },
             {
                 "type": "block",
                 "name": "main",
-                "top_left": [0, 0],
+                "top": 0,
+                "left": 0,
                 "width": 30,
                 "height": 50,
-                "pins": [{"name": "pin2", "top_left": [2, 2]}],
+                "pins": [{"name": "pin2", "top": 2, "left": 2}],
                 "objects": [
                     {
                         "type": "primitive",
                         "name": "valid_inner_primitive",
                         "link": "valid_primitive",
-                        "top_left": [0, 0],
+                        "top": 0,
+                        "left": 0,
                         "width": 15,
                         "height": 25,
-                        "pins": [{"name": "pin3", "top_left": [3, 3]}]
+                        "pins": [{"name": "pin3", "top": 3, "left": 3}]
                     }
                 ],
                 "pin_nets": [
@@ -49,7 +52,7 @@ class TestJsonParsing(unittest.TestCase):
 
         # Creating an invalid JSON file
         invalid_data = [
-            {"type": "invalid_type", "name": "invalid_entity", "top_left": [0, 0], "width": 10, "height": 20}
+            {"type": "invalid_type", "name": "invalid_entity", "top": 0, "left": 0, "width": 10, "height": 20}
         ]
 
         with open(self.invalid_json_filename, 'w') as f:
@@ -91,35 +94,41 @@ class TestJsonParsing(unittest.TestCase):
     def test_parse(self):
         result = parse(self.valid_json_filename)
         self.assertEqual(len(result), 2)
-        self.assertTrue(all(isinstance(entity, (Primitive, Block)) for entity in result))
+        self.assertTrue(all(isinstance(entity, (Primitive, Block)) for entity in result.values()))
 
     def test_parse_primitive(self):
-        data = {"type": "primitive", "name": "valid_primitive", "top_left": [0, 0], "width": 10, "height": 20, "pins": [{"name": "pin1", "top_left": [1, 1]}]}
+        data = {
+            "type": "primitive",
+            "name": "valid_primitive",
+            "top": 1,
+            "left": 1,
+            "width": 10,
+            "height": 20, "pins": [{"name": "pin1", "top": 1, "left": 1}]}
         result = parse_primitive(data)
         self.assertIsInstance(result, Primitive)
 
     def test_parse_block(self):
-        data = {"type": "block", "name": "valid_block", "top_left": [0, 0], "width": 30, "height": 50, "pins": [{"name": "pin2", "top_left": [2, 2]}], "objects": [{"type": "primitive", "name": "valid_inner_primitive", "link": "valid_primitive", "top_left": [1, 1], "width": 15, "height": 25, "pins": [{"name": "pin3", "top_left": [3, 3]}]}], "pin_nets": [{"name": "pin_net1", "pins": {"pins": ["pin2"]}, "lines": [[(0, 0), (1, 1)]]}]}
+        data = {"type": "block", "name": "valid_block", "top": 1, "left": 1, "width": 30, "height": 50, "pins": [{"name": "pin2", "top": 1, "left": 1}], "objects": [{"type": "primitive", "name": "valid_inner_primitive", "link": "valid_primitive", "top": 1, "left": 1, "width": 15, "height": 25, "pins": [{"name": "pin3", "top": 1, "left": 1}]}], "pin_nets": [{"name": "pin_net1", "pins": {"pins": ["pin2"]}, "lines": [[(0, 0), (1, 1)]]}]}
         result = parse_block(data)
         self.assertIsInstance(result, Block)
 
     def test_parse_object(self):
-        data = {"type": "primitive", "name": "valid_primitive", "link": "valid_primitive", "top_left": [0, 0], "width": 10, "height": 20}
+        data = {"type": "primitive", "name": "valid_primitive", "link": "valid_primitive", "top": 1, "left": 1, "width": 10, "height": 20}
         result = parse_object(data)
         self.assertIsInstance(result, Object)
 
     def test_parse_objects(self):
-        data = {"objects": [{"type": "primitive", "name": "valid_primitive", "link": "valid_primitive", "top_left": [0, 0], "width": 10, "height": 20}]}
+        data = {"objects": [{"type": "primitive", "name": "valid_primitive", "link": "valid_primitive", "top": 1, "left": 1, "width": 10, "height": 20}]}
         result = parse_objects(data)
         self.assertTrue(all(isinstance(obj, Object) for obj in result))
 
     def test_parse_pin(self):
-        data = {"name": "valid_pin", "top_left": [1, 1]}
+        data = {"name": "valid_pin", "top": 1, "left": 1}
         result = parse_pin(data)
         self.assertIsInstance(result, Pin)
 
     def test_parse_pins(self):
-        data = {"pins": [{"name": "valid_pin", "top_left": [1, 1]}]}
+        data = {"pins": [{"name": "valid_pin", "top": 1, "left": 1}]}
         result = parse_pins(data)
         self.assertTrue(all(isinstance(pin, Pin) for pin in result))
 
@@ -134,9 +143,9 @@ class TestJsonParsing(unittest.TestCase):
         self.assertTrue(all(isinstance(pin_net, PinNet) for pin_net in result))
 
     def test_parse_top_left(self):
-        data = {"top_left": [0, 0]}
+        data = {"top": 1, "left": 1}
         result = parse_top_left(data)
-        self.assertEqual(result, (0, 0))
+        self.assertEqual(result, (1, 1))
 
     def test_parse_name(self):
         data = {"name": "valid_name"}
