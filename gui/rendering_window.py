@@ -25,12 +25,11 @@ class RenderingWindow(QWidget):
         self.setLayout(common_v_layout)
 
     def __set_connections(self):
-        self.save_as_block_button.clicked.connect(self.rendering_widget.save_as_block)
-        self.clear_button.clicked.connect(self.clicked_clear)
-
+        self.clear_button.clicked.connect(self.clear)
+        self.rendering_widget.clear_area.connect(self.clear)
 
     @QtCore.pyqtSlot()
-    def clicked_clear(self):
+    def clear(self):
         """
         clear work zone
         :return:

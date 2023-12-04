@@ -49,7 +49,6 @@ class HierarchyWindow(QMainWindow):
 
         self.setCentralWidget(self.tree)
 
-
     def openMenu(self, position):
         mdlIdx = self.tree.indexAt(position)
         right_click_menu = QMenu()

@@ -132,7 +132,10 @@ class PinWidget(QWidget):
         self.update()
 
     def delete(self):
-        self.connected_widget.pin_widgets.remove(self)
+        try:
+            self.connected_widget.pin_widgets.remove(self)
+        except Exception:
+            pass
         try:
             self.connected_widget.unlock()
         except Exception:
@@ -140,7 +143,10 @@ class PinWidget(QWidget):
         self.connected_widget = None
         if self.wire:
             self.wire.delete()
-        self.parent().all_pin_widgets.pop(self)
+        try:
+            self.parent().all_pin_widgets.pop(self)
+        except Exception:
+            pass
         self.deleteLater()
 
     def add_wire(self):

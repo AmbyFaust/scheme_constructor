@@ -1,6 +1,6 @@
 import random
 
-from PyQt5.QtCore import Qt, QPoint
+from PyQt5.QtCore import Qt, QPoint, pyqtSignal
 from PyQt5.QtGui import QCursor, QMouseEvent
 from PyQt5.QtWidgets import QWidget, QMenu, QAction
 
@@ -16,6 +16,9 @@ from window_redactor.additonal_functions import is_point_on_rectangle_boundary
 
 
 class RenderingWidget(QWidget):
+
+    clear_area = pyqtSignal()
+
     def __init__(self):
         super().__init__()
         self.setAttribute(Qt.WA_StyledBackground, True)
@@ -129,6 +132,8 @@ class RenderingWidget(QWidget):
         return pin_widget
 
     def parse_block(self, block: Block):
+        self.clear_area.emit()
+
         for object_ in block.get_objects():
             if object_.get_object_type() == 'primitive':
                 prim_name = object_.get_name()
@@ -167,6 +172,8 @@ class RenderingWidget(QWidget):
                 self.add_block(block, b_pins)
 
     def parse_primitive(self, primitive: Primitive):
+        self.clear_area.emit()
+
         prim_pins = primitive.get_pins()
         self.add_primitive(primitive, prim_pins)
 
