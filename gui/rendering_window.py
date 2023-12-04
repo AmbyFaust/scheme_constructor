@@ -35,8 +35,6 @@ class RenderingWindow(QWidget):
         clear work zone
         :return:
         """
-        action = self.sender()
-        print("Pressed button", action.text())
 
         for wire_widg in list(self.rendering_widget.all_wire_widgets):
             wire_widg.delete()

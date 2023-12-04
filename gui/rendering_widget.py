@@ -15,7 +15,7 @@ from gui.primitive_widget import PrimitiveWidget
 from gui.wire_widget import Direction, WireWidget
 from settings import block_width, block_height, rendering_widget_width, rendering_widget_height, width_wire, pin_width, \
     pin_height, primitive_width, primitive_height
-from window_redactor.additonal_functions import is_point_on_rectangle_boundary
+from window_redactor.additonal_functions import is_point_on_rectangle_boundary, get_direction, get_crossroads
 
 
 class RenderingWidget(QWidget):
@@ -173,7 +173,6 @@ class RenderingWidget(QWidget):
 
             if object_.get_object_type() == 'block':
                 b_name = object_.get_name()
-                print(b_name)
                 b_top_left = object_.get_top_left()
                 b_width = object_.get_width()
                 b_height = object_.get_height()
@@ -181,7 +180,6 @@ class RenderingWidget(QWidget):
                 b_pins = []
                 for pin in block.get_pins():
                     b_pin_top, b_pin_left = pin.get_top_left()
-                    print(b_pin_top, b_pin_left, b_top_left[1], b_top_left[0])
                     if is_point_on_rectangle_boundary(b_top_left[1], b_top_left[0], b_width, b_height,
                                                       b_pin_left, b_pin_top):
                         b_pins.append(pin)
@@ -189,6 +187,21 @@ class RenderingWidget(QWidget):
 
                 block = Block(b_name, b_pins, [], [], b_top_left, b_width, b_height, b_link)
                 self.add_block(block, b_pins)
+
+        wires = []
+        for pin_net in block.get_pin_nets():
+            for line in pin_net.get_lines():
+                start = QPoint(*line[0])
+                end = QPoint(*line[1])
+                direction = get_direction(line[0], line[1])
+                connected_pins = pin_net.get_pins()
+                connected_crossroads = []
+                wires.append(self.add_wire(start, end, direction, connected_pins, connected_crossroads))
+
+            crossroads = get_crossroads(pin_net)
+
+            for crossroad in crossroads:
+                self.add_crossroad(wires, QPoint(*crossroad))
 
     def parse_primitive(self, primitive: Primitive):
         self.clear_area.emit()
