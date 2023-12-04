@@ -56,6 +56,7 @@ class WindowRedactor(QMainWindow):
             lay.setColumnStretch(c, 1)
 
         self.object_panel.objAddRequested.connect(self.work_zone.rendering_widget.add_object_from_panel)
+        self.work_zone.rendering_widget.objSaveRequested.connect(self.object_panel.registerObject)
         self.object_panel.show()
 
         # lay = QtWidgets.QVBoxLayout(self.work_zone)

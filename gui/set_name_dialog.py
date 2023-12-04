@@ -16,7 +16,7 @@ class SetNameDialog(QDialog):
 
     def __create_widgets(self):
         self.name_edit = QLineEdit(self.cur_name)
-        self.name_edit.setPlaceholderText("Если это примитив, то формат `prim_name.*` ");
+        self.name_edit.setPlaceholderText("Введите имя");
 
         self.accept_btn = QPushButton('Принять')
         self.cancel_btn = QPushButton('Отмена')
