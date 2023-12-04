@@ -55,6 +55,6 @@ class FilesWindow(QWidget):
             print(f"Schema {self.schema}")
             self.close()
         except Exception as exc:
-            print(f"Something go wrong in checker, LOG: {exc}")
+            print(f"Something go wrong in parser, schema is not loaded, LOG: {exc}")
 
 

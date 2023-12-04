@@ -1,5 +1,5 @@
 from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtCore import QRect, QSize, QPoint
+from PyQt5.QtCore import QRect, QSize, QPoint, Qt
 from PyQt5.QtWidgets import QListWidgetItem, QWidget
 from PyQt5.QtGui import QIcon
 
@@ -22,9 +22,24 @@ class ObjectItem(QListWidgetItem):
 
     def setStoredObject(self, obj: QWidget):
         self.__data = _ObjectDublicator.clone(obj)
+        qq = QWidget()
+        qq.setAttribute(Qt.WA_TranslucentBackground)
+        self.__data.setParent(qq)
+        self.__data.move(self.__data.pos() + QPoint(pin_width / 2, pin_height / 2))
+        for pin in self.__data.pin_widgets:
+            pin.setParent(qq)
+            pin.move(pin.pos() + QPoint(pin_width / 2, pin_height / 2))
         padding = min(pin_width, pin_height, 0)
-        self.setIcon(QIcon(self.__data.grab(QRect(QPoint(-padding//2,-padding//2), 
-                                            QSize(self.__data.width() + padding, self.__data.height() + padding)))))
+        #self.setIcon(QIcon(self.__data.grab(QRect(QPoint(-padding//2,-padding//2), 
+                                           # QSize(self.__data.width() + padding, self.__data.height() + padding)))))
+        self.setIcon(QIcon(qq.grab(QRect(QPoint(0, 0), 
+                                            QSize(self.__data.width() + pin_width, self.__data.height() + pin_height)))))
+        self.__data.setParent(None)
+        self.__data.move(self.__data.pos() - QPoint(pin_width / 2, pin_height / 2))
+        for pin in self.__data.pin_widgets:
+            pin.setParent(self.__data)
+            pin.move(pin.pos() - QPoint(pin_width / 2, pin_height / 2))
+        qq.deleteLater()
 
     def getStoredObject(self) -> QWidget:
         return _ObjectDublicator.clone(self.__data)
@@ -56,8 +71,10 @@ class _ObjectDublicator:
         if not cloned:
             return cloned
 
+        cloned.move(0, 0)
         for pin in obj.pin_widgets:
-            pin_widget = PinWidget(cloned, pin.pin, cloned)
+            pin_widget = PinWidget(None, pin.pin, cloned)
+            pin_widget.setParent(cloned)
             pin_widget.move(pin.pos() - obj.pos())
             cloned.pin_widgets.append(pin_widget)
             pin_widget.show()

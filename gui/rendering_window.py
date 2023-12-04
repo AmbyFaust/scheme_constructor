@@ -12,6 +12,7 @@ class RenderingWindow(QWidget):
 
     def __set_widgets(self):
         self.rendering_widget = RenderingWidget()
+        self.rendering_widget.setParent(self)
         self.save_as_block_button = QPushButton('Save as Block')
         self.clear_button = QPushButton('Clear')
 

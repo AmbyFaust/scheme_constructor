@@ -57,7 +57,7 @@ class BlockWidget(QWidget):
     def __create_pin_widgets(self, pins: list = None):
         if pins:
             for pin in pins:
-                self.pin_widgets.append(self.parent().add_pin(self, pin))
+                self.parent().add_pin(self, pin)
 
     def show_context_menu(self, position):
         context_menu = QMenu(self)

@@ -59,6 +59,7 @@ class HierarchyWindow(QMainWindow):
     def visualize(self, stand_item: StandardItem):
         self.visualize_item.emit(stand_item.name)
         print(stand_item.objects, stand_item.type)
+        print(stand_item.name, stand_item.objects, stand_item.type, stand_item.link)
 
     def get_hierarchy(self, objects: dict):
         """
@@ -81,22 +82,27 @@ class HierarchyWindow(QMainWindow):
         for obj_name in self.objects.keys():
             stand_item, type, link = self.__dfs(obj_name, self.objects[obj_name]._link)
             root.appendRow([stand_item, type, link])
+        #stand_item, type, link = self.__dfs('main', self.objects['main']._link)
+        #root.appendRow([stand_item, type, link])
 
     def __dfs(self, name, link):
         if name in self.objects.keys():
-            print(self.objects[name]._link)
             stand_item = StandardItem(name, self.objects[name], link)
             if type(self.objects[name]).__name__ == "Block":
                 for obj_inn in self.objects[name]._objects:
+                    #print(obj_inn._name, obj_inn._link)
                     stand_item_inn, type_inn, link_inn = self.__dfs(obj_inn._name, obj_inn._link)
                     stand_item.appendRow([stand_item_inn, QStandardItem(type_inn), QStandardItem(link_inn)])
+            print(name, self.objects[name], link, type(self.objects[name]).__name__)
             return stand_item, QStandardItem(type(self.objects[name]).__name__), QStandardItem(link)
         else:
+            #print(name, link)
             stand_item = StandardItem(name, self.objects[link], link)
             if type(self.objects[link]).__name__ == "Block":
                 for obj_inn in self.objects[link]._objects:
                     stand_item_inn, type_inn, link_inn = self.__dfs(obj_inn._name, obj_inn._link)
                     stand_item.appendRow([stand_item_inn, QStandardItem(type_inn), QStandardItem(link_inn)])
+            print(name, self.objects[link], link, type(self.objects[link]).__name__)
             return stand_item, QStandardItem(type(self.objects[link]).__name__), QStandardItem(link)
 
     # def __dfs(self, base_obj):

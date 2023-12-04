@@ -1,9 +1,12 @@
 import random
 
-from PyQt5.QtCore import Qt, QPoint, pyqtSignal
-from PyQt5.QtGui import QCursor, QMouseEvent
-from PyQt5.QtWidgets import QWidget, QMenu, QAction
+import re
+from PyQt5.QtCore import Qt, QPoint, pyqtSlot, pyqtSignal
 
+from PyQt5.QtGui import QCursor, QMouseEvent
+from PyQt5.QtWidgets import QWidget, QMenu, QAction, QMessageBox, QDialog
+
+from gui.set_name_dialog import SetNameDialog
 from schema_classes.schema_classes import Primitive, Block, Pin
 from gui.block_widget import BlockWidget
 from gui.crossroad_widget import CrossroadWidget
@@ -72,7 +75,23 @@ class RenderingWidget(QWidget):
     def add_external_pin(self):
         self.add_pin(self)
 
-    def add_primitive(self, primitive: Primitive = None, pins: [Pin] = None):
+    @pyqtSlot(object)
+    def add_object_from_panel(self, object_wid):
+        if object_wid:
+            object_wid.setParent(self)
+            object_wid.move(50, 50)
+            object_wid.show()
+            for pin in object_wid.pin_widgets:
+                pin.setParent(self)
+                pin.move(object_wid.pos() + pin.pos()) #+ QPoint(object_wid.width(), 0))
+                pin.show()
+                self.all_pin_widgets[pin] = True
+            if isinstance(object_wid, PrimitiveWidget):
+                self.all_primitive_widgets[object_wid] = True
+            elif isinstance(object_wid, BlockWidget):
+                self.all_block_widgets[object_wid] = True
+
+    def add_primitive(self, primitive: Primitive = None, pins: list = None):
         if not primitive:
             primitive = Primitive(
                 self.gen_name('primitive', self.get_primitive_names()), [], (0, 100), primitive_width, primitive_height
@@ -191,6 +210,55 @@ class RenderingWidget(QWidget):
         crossroad_widget.show()
         return crossroad_widget
 
+
+    @pyqtSlot()
+    def save_as_block(self):
+        primitives_names = self.get_primitive_names()
+        block_names = self.get_block_names()
+        if len(primitives_names) + len(block_names) > 0:
+            if len(set(primitives_names)) == len(primitives_names) and len(set(block_names)) == len(block_names):
+                set_name_dialog = SetNameDialog("")
+                if set_name_dialog.exec_() == QDialog.Accepted:
+                    block_name = set_name_dialog.name_edit.text()
+                    if re.match("[A-Za-z0-9]+$", block_name):
+                        outer_pins = list()
+                        for pin in self.pin_widgets:
+                            top_left = [0, 0]
+                            ########## почему x, y стоят в виджетах в другом порядке?????
+                            if pin.pos().y() < 2:
+                                top_left = [block_width * (pin.pos().x() / rendering_widget_width) - pin_width / 2,
+                                            -pin_height / 2][::-1]
+                            elif pin.pos().y() + pin_height >= rendering_widget_height - 2:
+                                top_left = [block_width * (pin.pos().x() / rendering_widget_width) - pin_width / 2,
+                                                block_height - pin_height / 2][::-1]
+
+                            elif pin.pos().x() < 2:
+                                top_left = [-pin_width / 2, block_height * (pin.pos().y() / rendering_widget_height) - pin_height / 2][::-1]
+
+                            elif pin.pos().x() + pin_width >= rendering_widget_width - 2:
+                                top_left = [block_width - pin_width / 2, block_height * (pin.pos().y() / rendering_widget_height) - pin_height / 2][::-1]
+
+                            pin_name = block_name + "." + pin.pin.get_name()
+                            outer_pins.append(Pin(pin_name, top_left))
+                        block_wid = self.add_block(Block(block_name, [], [], [], [0,0], block_width,
+                                                            block_height, block_name), outer_pins)
+                        self.objSaveRequested.emit(block_wid)
+                        block_wid.hide()
+                        for pin in block_wid.pin_widgets:
+                            pin.hide()
+                        block_wid.delete()
+
+            else:
+                msg = QMessageBox()
+                msg.setWindowTitle("Error")
+                msg.setText("Объекты должны иметь разные имена")
+                msg.exec()
+        else:
+            msg = QMessageBox()
+            msg.setWindowTitle("Error")
+            msg.setText("Нельзя сохранить пустую схему")
+            msg.exec()
+
     def mousePressEvent(self, event):
         print('--------')
         print('primitives:', len(self.all_primitive_widgets))
@@ -255,3 +323,4 @@ class RenderingWidget(QWidget):
             point = QPoint(event.x(), event.y())
             self.rendered_wire.set_location(point=point)
 
+    objSaveRequested = pyqtSignal(QWidget)
