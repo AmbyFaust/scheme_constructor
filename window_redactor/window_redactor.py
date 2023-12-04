@@ -1,11 +1,15 @@
+import re
+
 from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtWidgets import QMenu, QMainWindow, QMenuBar
+from PyQt5.QtWidgets import QMenu, QMainWindow, QMenuBar, QDialog, QMessageBox
 
 from gui.rendering_window import RenderingWindow
 from gui.rendering_widget import RenderingWidget
 from gui.object_panel import ObjectPanel
 from hierarchy_window import hierarchy_window
 from files_window.files_window import FilesWindow
+from coder_parser.coder import scheme_to_json
+from gui.set_name_dialog import SetNameDialog
 
 
 class WindowRedactor(QMainWindow):
@@ -80,7 +84,7 @@ class WindowRedactor(QMainWindow):
         self.menuBar.addMenu(fileMenu)
 
         fileMenu.addAction('open', self.clicked_open)
-        fileMenu.addAction('close', self.clicked_close)
+        fileMenu.addAction('save to json', self.clicked_save_json)
 
         clear = QMenu("&Clear", self)
         self.menuBar.addMenu(clear)
@@ -142,10 +146,32 @@ class WindowRedactor(QMainWindow):
         self.files_window.show()
 
     @QtCore.pyqtSlot()
-    def clicked_close(self):
+    def clicked_save_json(self):
         """
         close current redactor project
         :return:
         """
         action = self.sender()
+        set_name_dialog = SetNameDialog(cur_name="", title_name="Сохранение схемы", place_holder="имя файла должно заканчиваться на .json")
+        if set_name_dialog.exec_() == QDialog.Accepted:
+            print(set_name_dialog.name_edit.text()[-5:])
+            msg = QMessageBox()
+            if re.match("[A-Za-z0-9]+\.json$", set_name_dialog.name_edit.text()):
+                exc = None
+                try:
+                    scheme_to_json(schema=self.schema, filename=self.dir_path+set_name_dialog.name_edit.text())
+                except Exception as exc_:
+                    exc = exc_
+                    print(f"Something go wrong in coder, LOG: {exc}")
+                if not (exc is None):
+                    msg.setWindowTitle("Error in coder")
+                    msg.setText(f"error: {exc}")
+                else:
+                    msg.setWindowTitle("Saved")
+                    msg.setText(f"schema saved: {set_name_dialog.name_edit.text()}")
+            else:
+                msg.setWindowTitle("Error")
+                msg.setText("Incorrect file name")
+            msg.exec()
+
         print("Pressed button", action.text())

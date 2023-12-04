@@ -4,11 +4,12 @@ from PyQt5.QtWidgets import QDialog, QWidget, QLineEdit, QPushButton, QVBoxLayou
 
 
 class SetNameDialog(QDialog):
-    def __init__(self, cur_name: str):
+    def __init__(self, cur_name: str, title_name='Изменение имени', place_holder="Введите имя"):
         super().__init__()
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
-        self.setWindowTitle('Изменение имени')
+        self.setWindowTitle(title_name)
         self.cur_name = cur_name
+        self.place_holder = place_holder
         self.setMinimumSize(500, 0)
         self.__create_widgets()
         self.__create_layouts()
@@ -16,7 +17,7 @@ class SetNameDialog(QDialog):
 
     def __create_widgets(self):
         self.name_edit = QLineEdit(self.cur_name)
-        self.name_edit.setPlaceholderText("Введите имя");
+        self.name_edit.setPlaceholderText(self.place_holder);
 
         self.accept_btn = QPushButton('Принять')
         self.cancel_btn = QPushButton('Отмена')
