@@ -108,6 +108,7 @@ class WindowRedactor(QMainWindow):
         # self.hierarchy_window.get_hierarchy(primitives_widgets, block_widgets)
 
         self.schema = objects
+        print("Schema updated")
         self.hierarchy_window.get_hierarchy(self.schema)
 
 

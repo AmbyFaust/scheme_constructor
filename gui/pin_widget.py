@@ -68,7 +68,7 @@ class PinWidget(QWidget):
         self.__create_actions()
         self.unlock()
 
-        self.move(*pin.get_top_left()[::-1])
+        self.move(* list(map(round, pin.get_top_left()[::-1])))
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.show_context_menu)
         self.setMouseTracking(True)

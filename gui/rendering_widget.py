@@ -162,7 +162,8 @@ class RenderingWidget(QWidget):
     def save_as_block(self):
         primitives_names = self.get_primitive_names()
         block_names = self.get_block_names()
-        if len(primitives_names) + len(block_names) > 0:
+        pin_names = self.get_pin_names()
+        if len(primitives_names) + len(block_names) + len(pin_names) > 0:
             if len(set(primitives_names)) == len(primitives_names) and len(set(block_names)) == len(block_names):
                 set_name_dialog = SetNameDialog("")
                 if set_name_dialog.exec_() == QDialog.Accepted:

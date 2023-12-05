@@ -1,0 +1,99 @@
+[
+	{
+		"name": "main",
+		"type": "block",
+		"objects":
+		[
+			{
+				"name": "b1",
+				"type": "block",
+				"link": "block1",
+				"top_left": [2, 4],
+				"height": 10,
+				"width": 6
+			}
+		],
+		"pins":
+		[
+			{
+				"name": "",
+				"top_left": [4, 4]
+			},
+			{
+				"name": "",
+				"top_left": [4, 8]
+			},
+			{
+				"name": "",
+				"top_left": [10, 4]
+			},
+			{
+				"name": "",
+				"top_left": [10, 8]
+			},
+			{
+				"name": "",
+				"top_left": [17, 4]
+			},
+			{
+				"name": "",
+				"top_left": [17, 8]
+			}
+		],
+		"pin_nets":
+		[
+			{
+				"name": "",
+				"pins": ["", ""],
+				"lines": [[4, 4], [2, 4], [4, 8]]
+			},
+			{
+				"name": "",
+				"pins": ["", ""],
+				"lines": [[10, 4], [17, 4]]
+			},
+			{
+				"name": "",
+				"pins": ["", ""],
+				"lines": [[10, 8], [17, 8]]
+			}
+		]
+	},
+	{
+		"name": "block1",
+		"type": "block",
+		"objects": [],
+		"pins":
+		[
+			{
+				"name": "",
+				"top_left": [23, 4]
+			},
+			{
+				"name": "",
+				"top_left": [23, 8]
+			},
+			{
+				"name": "",
+				"top_left": [29, 4]
+			},
+			{
+				"name": "",
+				"top_left": [29, 8]
+			}	
+		],
+		"pin_nets":
+		[
+			{
+				"name": "",
+				"pins": ["", ""],
+				"lines": [[23, 4], [25, 4], [25, 8], [23, 8]]
+			},
+			{
+				"name": "",
+				"pins": ["", ""],
+				"lines": [[29, 4], [27, 4], [27, 8], [29, 8]]
+			}
+		]
+	}
+]

@@ -25,20 +25,20 @@ class ObjectItem(QListWidgetItem):
         qq = QWidget()
         qq.setAttribute(Qt.WA_TranslucentBackground)
         self.__data.setParent(qq)
-        self.__data.move(self.__data.pos() + QPoint(pin_width / 2, pin_height / 2))
+        self.__data.move(self.__data.pos() + QPoint(int(pin_width / 2), int(pin_height / 2)))
         for pin in self.__data.pin_widgets:
             pin.setParent(qq)
-            pin.move(pin.pos() + QPoint(pin_width / 2, pin_height / 2))
+            pin.move(pin.pos() + QPoint(int(pin_width / 2), int(pin_height / 2)))
         padding = min(pin_width, pin_height, 0)
         #self.setIcon(QIcon(self.__data.grab(QRect(QPoint(-padding//2,-padding//2), 
                                            # QSize(self.__data.width() + padding, self.__data.height() + padding)))))
         self.setIcon(QIcon(qq.grab(QRect(QPoint(0, 0), 
                                             QSize(self.__data.width() + pin_width, self.__data.height() + pin_height)))))
         self.__data.setParent(None)
-        self.__data.move(self.__data.pos() - QPoint(pin_width / 2, pin_height / 2))
+        self.__data.move(self.__data.pos() - QPoint(int(pin_width / 2), int(pin_height / 2)))
         for pin in self.__data.pin_widgets:
             pin.setParent(self.__data)
-            pin.move(pin.pos() - QPoint(pin_width / 2, pin_height / 2))
+            pin.move(pin.pos() - QPoint(int(pin_width / 2), int(pin_height / 2)))
         qq.deleteLater()
 
     def getStoredObject(self) -> QWidget:
